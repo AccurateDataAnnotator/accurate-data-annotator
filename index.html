@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ADA — Accurate Data Annotator | Training Platform</title>
+  <meta name="description" content="ADA's Annotator Training Platform — screen, train, and certify bilingual data annotation talent." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <style>
+    @layer reset, base, layout, components, utils;
+
+    @layer reset {
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+      img, svg { display: block; max-width: 100%; }
+      a { color: inherit; text-decoration: none; }
+      ul { list-style: none; }
+    }
+
+    @layer base {
+      :root {
+        --red: #CC0000;
+        --red-bright: #FF1A1A;
+        --red-dim: #990000;
+        --black: #000000;
+        --surface: #0A0A0A;
+        --surface-2: #111111;
+        --surface-3: #1A1A1A;
+        --white: #FFFFFF;
+        --white-70: rgba(255,255,255,0.7);
+        --white-30: rgba(255,255,255,0.3);
+        --white-10: rgba(255,255,255,0.08);
+        --font-display: 'Syne', sans-serif;
+        --font-body: 'DM Sans', sans-serif;
+        --radius-sm: 6px;
+        --radius-md: 12px;
+        --radius-lg: 20px;
+        --radius-pill: 999px;
+        --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      body {
+        background: var(--black);
+        color: var(--white);
+        font-family: var(--font-body);
+        font-size: clamp(15px, 1.1vw, 17px);
+        line-height: 1.65;
+        min-height: 100vh;
+      }
+
+      h1, h2, h3, h4 {
+        font-family: var(--font-display);
+        line-height: 1.15;
+        letter-spacing: -0.02em;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+      }
+    }
+
+    @layer layout {
+      .container {
+        width: min(1180px, 100% - 3rem);
+        margin-inline: auto;
+      }
+      .section {
+        padding-block: clamp(4rem, 8vw, 7rem);
+      }
+    }
+
+    /* ── NAV ── */
+    @layer components {
+      .nav {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: rgba(0,0,0,0.85);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--white-10);
+      }
+      .nav__inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-block: 1rem;
+      }
+      .nav__logo {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      .nav__logo img {
+        width: 40px;
+        height: 40px;
+        object-fit: contain;
+        border-radius: 50%;
+      }
+      .nav__brand {
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: 0.78rem;
+        letter-spacing: 0.04em;
+      }
+      .nav__brand span {
+        color: var(--red);
+      }
+      .nav__links {
+        display: flex;
+        align-items: center;
+        gap: clamp(1rem, 2.5vw, 2rem);
+      }
+      .nav__link {
+        font-family: var(--font-display);
+        font-size: 0.82rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--white-70);
+        transition: color var(--transition);
+        position: relative;
+        padding-block: 0.25rem;
+      }
+      .nav__link::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 1.5px;
+        background: var(--red);
+        transition: width var(--transition);
+      }
+      .nav__link:hover { color: var(--white); }
+      .nav__link:hover::after { width: 100%; }
+      .nav__link--active { color: var(--white); }
+      .nav__link--active::after { width: 100%; }
+      .nav__cta {
+        background: var(--red);
+        color: var(--white);
+        font-family: var(--font-display);
+        font-size: 0.82rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 0.55rem 1.3rem;
+        border-radius: var(--radius-pill);
+        transition: background var(--transition), transform var(--transition);
+      }
+      .nav__cta:hover {
+        background: var(--red-bright);
+        transform: translateY(-1px);
+      }
+      .nav__toggle {
+        display: none;
+        flex-direction: column;
+        gap: 5px;
+        cursor: pointer;
+        background: none;
+        border: none;
+        padding: 4px;
+      }
+      .nav__toggle span {
+        display: block;
+        width: 24px;
+        height: 2px;
+        background: var(--white);
+        border-radius: 2px;
+        transition: var(--transition);
+      }
+
+      @media (max-width: 768px) {
+        .nav__toggle { display: flex; }
+        .nav__links {
+          display: none;
+          position: absolute;
+          top: 100%;
+          left: 0;
+          right: 0;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0;
+          background: rgba(0,0,0,0.97);
+          border-bottom: 1px solid var(--white-10);
+          padding: 1rem 1.5rem 1.5rem;
+        }
+        .nav__links.open { display: flex; }
+        .nav__link { font-size: 0.9rem; padding-block: 0.6rem; }
+        .nav__cta { margin-top: 0.5rem; display: inline-block; }
+      }
+
+      /* ── HERO ── */
+      .hero {
+        position: relative;
+        min-height: 92vh;
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        background: var(--black);
+      }
+      .hero__bg-grid {
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(204,0,0,0.06) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(204,0,0,0.06) 1px, transparent 1px);
+        background-size: 60px 60px;
+        mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+      }
+      .hero__glow {
+        position: absolute;
+        width: 600px;
+        height: 600px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(204,0,0,0.18) 0%, transparent 70%);
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        animation: pulse-glow 4s ease-in-out infinite;
+        pointer-events: none;
+      }
+      @keyframes pulse-glow {
+        0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+        50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+      }
+      .hero__content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        max-width: 860px;
+        margin-inline: auto;
+      }
+      .hero__eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-family: var(--font-display);
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--red);
+        border: 1px solid rgba(204,0,0,0.35);
+        padding: 0.4rem 1rem;
+        border-radius: var(--radius-pill);
+        margin-bottom: 2rem;
+        background: rgba(204,0,0,0.06);
+      }
+      .hero__eyebrow::before,
+      .hero__eyebrow::after {
+        content: '[ ]';
+        font-size: 0.65rem;
+        opacity: 0.5;
+      }
+      .hero__title {
+        font-size: clamp(2.8rem, 7vw, 6rem);
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1.05;
+        margin-bottom: 1.5rem;
+      }
+      .hero__title .accent {
+        color: var(--red);
+        position: relative;
+        display: inline-block;
+      }
+      .hero__title .accent::after {
+        content: '';
+        position: absolute;
+        bottom: 0.05em;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: var(--red);
+        border-radius: 2px;
+        opacity: 0.5;
+      }
+      .hero__subtitle {
+        font-size: clamp(1rem, 1.8vw, 1.2rem);
+        color: var(--white-70);
+        max-width: 580px;
+        margin-inline: auto;
+        margin-bottom: 2.5rem;
+        font-weight: 300;
+        line-height: 1.7;
+      }
+      .hero__actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 0.88rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 0.85rem 2rem;
+        border-radius: var(--radius-pill);
+        border: none;
+        cursor: pointer;
+        transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+        text-decoration: none;
+      }
+      .btn--primary {
+        background: var(--red);
+        color: var(--white);
+        box-shadow: 0 0 0 0 rgba(204,0,0,0);
+      }
+      .btn--primary:hover {
+        background: var(--red-bright);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(204,0,0,0.4);
+      }
+      .btn--ghost {
+        background: transparent;
+        color: var(--white);
+        border: 1.5px solid var(--white-30);
+      }
+      .btn--ghost:hover {
+        border-color: var(--white);
+        transform: translateY(-2px);
+      }
+
+      /* ── STATS BAR ── */
+      .stats {
+        background: var(--surface-2);
+        border-block: 1px solid var(--white-10);
+        padding-block: 2rem;
+      }
+      .stats__grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 2rem;
+        text-align: center;
+      }
+      .stat__number {
+        font-family: var(--font-display);
+        font-size: clamp(1.8rem, 3vw, 2.5rem);
+        font-weight: 800;
+        color: var(--red);
+        line-height: 1;
+        margin-bottom: 0.3rem;
+      }
+      .stat__label {
+        font-size: 0.78rem;
+        font-weight: 500;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--white-70);
+      }
+
+      /* ── SERVICES ── */
+      .services__header {
+        text-align: center;
+        margin-bottom: clamp(2.5rem, 5vw, 4rem);
+      }
+      .section__eyebrow {
+        font-family: var(--font-display);
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--red);
+        margin-bottom: 0.8rem;
+      }
+      .section__title {
+        font-size: clamp(1.8rem, 4vw, 3rem);
+        font-weight: 800;
+        margin-bottom: 1rem;
+      }
+      .section__sub {
+        color: var(--white-70);
+        max-width: 520px;
+        margin-inline: auto;
+        font-weight: 300;
+      }
+      .services__grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5px;
+        background: var(--white-10);
+        border: 1px solid var(--white-10);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+      }
+      .service-card {
+        background: var(--surface);
+        padding: clamp(1.5rem, 3vw, 2.5rem);
+        position: relative;
+        transition: background var(--transition);
+      }
+      .service-card:hover { background: var(--surface-2); }
+      .service-card__icon {
+        width: 44px;
+        height: 44px;
+        border-radius: var(--radius-sm);
+        background: rgba(204,0,0,0.12);
+        border: 1px solid rgba(204,0,0,0.25);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        margin-bottom: 1.2rem;
+      }
+      .service-card__title {
+        font-family: var(--font-display);
+        font-size: 1.05rem;
+        font-weight: 700;
+        margin-bottom: 0.6rem;
+      }
+      .service-card__desc {
+        font-size: 0.88rem;
+        color: var(--white-70);
+        line-height: 1.6;
+        margin-bottom: 1rem;
+      }
+      .service-card__tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+      }
+      .tag {
+        font-family: var(--font-display);
+        font-size: 0.68rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 0.25rem 0.6rem;
+        border-radius: var(--radius-pill);
+        background: var(--white-10);
+        color: var(--white-70);
+        border: 1px solid var(--white-10);
+      }
+
+      /* ── PLATFORM FLOW ── */
+      .flow { background: var(--surface); }
+      .flow__steps {
+        display: grid;
+        gap: 0;
+        counter-reset: step;
+        max-width: 720px;
+        margin-inline: auto;
+        position: relative;
+      }
+      .flow__steps::before {
+        content: '';
+        position: absolute;
+        left: 28px;
+        top: 0;
+        bottom: 0;
+        width: 1px;
+        background: linear-gradient(to bottom, transparent, var(--red) 10%, var(--red) 90%, transparent);
+      }
+      .flow__step {
+        display: grid;
+        grid-template-columns: 56px 1fr;
+        gap: 1.5rem;
+        padding-block: 1.8rem;
+        position: relative;
+        counter-increment: step;
+      }
+      .flow__step-num {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: var(--black);
+        border: 1.5px solid var(--red);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-display);
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--red);
+        letter-spacing: 0.05em;
+        flex-shrink: 0;
+        position: relative;
+        z-index: 1;
+      }
+      .flow__step-num::before {
+        content: '0' counter(step);
+      }
+      .flow__step-body { padding-top: 0.8rem; }
+      .flow__step-title {
+        font-family: var(--font-display);
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 0.3rem;
+      }
+      .flow__step-desc {
+        font-size: 0.88rem;
+        color: var(--white-70);
+        line-height: 1.6;
+      }
+      .flow__step--active .flow__step-num {
+        background: var(--red);
+        color: var(--white);
+        box-shadow: 0 0 20px rgba(204,0,0,0.5);
+      }
+      .flow__step--soon .flow__step-num {
+        border-color: var(--white-30);
+        color: var(--white-30);
+      }
+      .badge {
+        display: inline-block;
+        font-family: var(--font-display);
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        padding: 0.2rem 0.55rem;
+        border-radius: var(--radius-pill);
+        margin-left: 0.5rem;
+        vertical-align: middle;
+      }
+      .badge--live { background: rgba(204,0,0,0.2); color: var(--red); border: 1px solid rgba(204,0,0,0.4); }
+      .badge--soon { background: var(--white-10); color: var(--white-70); border: 1px solid var(--white-10); }
+
+      /* ── WHY ADA ── */
+      .why__grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 1.5rem;
+      }
+      .why-card {
+        padding: 2rem;
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--white-10);
+        background: var(--surface);
+        transition: border-color var(--transition), transform var(--transition);
+        position: relative;
+        overflow: hidden;
+      }
+      .why-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--red), transparent);
+        opacity: 0;
+        transition: opacity var(--transition);
+      }
+      .why-card:hover {
+        border-color: rgba(204,0,0,0.3);
+        transform: translateY(-3px);
+      }
+      .why-card:hover::before { opacity: 1; }
+      .why-card__icon {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+      }
+      .why-card__title {
+        font-family: var(--font-display);
+        font-size: 0.95rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+      }
+      .why-card__desc {
+        font-size: 0.86rem;
+        color: var(--white-70);
+        line-height: 1.6;
+      }
+
+      /* ── CTA BAND ── */
+      .cta-band {
+        background: var(--surface-2);
+        border-block: 1px solid var(--white-10);
+        position: relative;
+        overflow: hidden;
+      }
+      .cta-band__glow {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse 60% 120% at 50% 100%, rgba(204,0,0,0.15) 0%, transparent 70%);
+        pointer-events: none;
+      }
+      .cta-band__inner {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+        max-width: 640px;
+        margin-inline: auto;
+      }
+      .cta-band__title {
+        font-size: clamp(1.6rem, 3.5vw, 2.5rem);
+        font-weight: 800;
+        margin-bottom: 0.8rem;
+      }
+      .cta-band__sub {
+        color: var(--white-70);
+        margin-bottom: 2rem;
+        font-weight: 300;
+      }
+      .cta-band__actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      /* ── CONTACT ── */
+      .contact__grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4rem;
+        align-items: start;
+      }
+      @media (max-width: 768px) {
+        .contact__grid { grid-template-columns: 1fr; gap: 2.5rem; }
+      }
+      .contact__label {
+        font-family: var(--font-display);
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--red);
+        margin-bottom: 0.8rem;
+      }
+      .contact__title {
+        font-size: clamp(1.6rem, 3vw, 2.2rem);
+        font-weight: 800;
+        margin-bottom: 1rem;
+      }
+      .contact__desc {
+        color: var(--white-70);
+        font-weight: 300;
+        line-height: 1.7;
+        margin-bottom: 1.5rem;
+      }
+      .contact__email {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: var(--font-display);
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--red);
+        border: 1px solid rgba(204,0,0,0.3);
+        padding: 0.6rem 1.2rem;
+        border-radius: var(--radius-pill);
+        transition: background var(--transition), border-color var(--transition);
+      }
+      .contact__email:hover {
+        background: rgba(204,0,0,0.1);
+        border-color: var(--red);
+      }
+      .contact__form-wrap {
+        background: var(--surface-2);
+        border: 1px solid var(--white-10);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+      }
+      .contact__form-title {
+        font-family: var(--font-display);
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+      }
+      .form-field {
+        margin-bottom: 1rem;
+      }
+      .form-field label {
+        display: block;
+        font-family: var(--font-display);
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--white-70);
+        margin-bottom: 0.4rem;
+      }
+      .form-field input,
+      .form-field textarea,
+      .form-field select {
+        width: 100%;
+        background: var(--surface-3);
+        border: 1px solid var(--white-10);
+        border-radius: var(--radius-sm);
+        color: var(--white);
+        font-family: var(--font-body);
+        font-size: 0.9rem;
+        padding: 0.75rem 1rem;
+        outline: none;
+        transition: border-color var(--transition);
+        appearance: none;
+      }
+      .form-field input:focus,
+      .form-field textarea:focus,
+      .form-field select:focus {
+        border-color: var(--red);
+      }
+      .form-field textarea { resize: vertical; min-height: 100px; }
+      .form-field select option { background: var(--surface-3); }
+      .form__submit {
+        width: 100%;
+        background: var(--red);
+        color: var(--white);
+        font-family: var(--font-display);
+        font-size: 0.85rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 0.85rem;
+        border-radius: var(--radius-pill);
+        border: none;
+        cursor: pointer;
+        transition: background var(--transition), transform var(--transition);
+        margin-top: 0.5rem;
+      }
+      .form__submit:hover {
+        background: var(--red-bright);
+        transform: translateY(-1px);
+      }
+
+      /* ── FOOTER ── */
+      .footer {
+        background: var(--surface);
+        border-top: 1px solid var(--white-10);
+        padding-block: 3rem 2rem;
+      }
+      .footer__grid {
+        display: grid;
+        grid-template-columns: 2fr repeat(3, 1fr);
+        gap: 3rem;
+        margin-bottom: 3rem;
+      }
+      @media (max-width: 900px) {
+        .footer__grid { grid-template-columns: 1fr 1fr; }
+      }
+      @media (max-width: 580px) {
+        .footer__grid { grid-template-columns: 1fr; gap: 2rem; }
+      }
+      .footer__brand-logo {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin-bottom: 1rem;
+      }
+      .footer__brand-logo img {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        object-fit: contain;
+      }
+      .footer__brand-name {
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: 1rem;
+        letter-spacing: 0.04em;
+      }
+      .footer__brand-name span { color: var(--red); }
+      .footer__tagline {
+        font-size: 0.82rem;
+        color: var(--white-70);
+        line-height: 1.6;
+        margin-bottom: 1.2rem;
+        max-width: 280px;
+      }
+      .footer__social {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+      }
+      .footer__social a {
+        font-family: var(--font-display);
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--white-70);
+        border: 1px solid var(--white-10);
+        padding: 0.3rem 0.7rem;
+        border-radius: var(--radius-pill);
+        transition: color var(--transition), border-color var(--transition);
+      }
+      .footer__social a:hover { color: var(--white); border-color: var(--white-30); }
+      .footer__col-title {
+        font-family: var(--font-display);
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--white-70);
+        margin-bottom: 1rem;
+      }
+      .footer__col ul { display: flex; flex-direction: column; gap: 0.5rem; }
+      .footer__col a {
+        font-size: 0.85rem;
+        color: var(--white-70);
+        transition: color var(--transition);
+      }
+      .footer__col a:hover { color: var(--white); }
+      .footer__bottom {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--white-10);
+      }
+      .footer__copy {
+        font-size: 0.78rem;
+        color: var(--white-30);
+      }
+      .footer__domain {
+        font-family: var(--font-display);
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--red);
+      }
+
+      /* ── SCROLL REVEAL ── */
+      .reveal {
+        opacity: 0;
+        transform: translateY(24px);
+        transition: opacity 0.6s ease, transform 0.6s ease;
+      }
+      .reveal.visible {
+        opacity: 1;
+        transform: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="container">
+      <div class="nav__inner">
+        <a href="index.html" class="nav__logo">
+          <img src="ADA-Logo.png" alt="ADA Logo" />
+          <span class="nav__brand"><span>ADA</span> &middot; Annotation · Labeling · Evaluation · Training</span>
+        </a>
+        <button class="nav__toggle" id="navToggle" aria-label="Toggle menu">
+          <span></span><span></span><span></span>
+        </button>
+        <ul class="nav__links" id="navLinks">
+          <li><a href="index.html" class="nav__link nav__link--active">Home</a></li>
+          <li><a href="register.html" class="nav__link">Register</a></li>
+          <li><a href="#services" class="nav__link">Services</a></li>
+          <li><a href="#platform" class="nav__link">Platform</a></li>
+          <li><a href="#contact" class="nav__link">Contact</a></li>
+          <li><a href="register.html" class="nav__cta">Apply Now</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero__bg-grid"></div>
+    <div class="hero__glow"></div>
+    <div class="container">
+      <div class="hero__content">
+        <div class="hero__eyebrow">Annotation · Labeling · Evaluation · Training</div>
+        <h1 class="hero__title">
+          Train the <span class="accent">Humans</span><br />
+          Behind the AI
+        </h1>
+        <p class="hero__subtitle">
+          ADA is a bilingual Arabic-English data annotation company. We train and certify professional annotators — and deliver high-quality datasets to AI teams worldwide.
+        </p>
+        <div class="hero__actions">
+          <a href="register.html" class="btn btn--primary">
+            Join as Annotator
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7h8M8 4l3 3-3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <a href="#contact" class="btn btn--ghost">Request Data Services</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="container">
+      <div class="stats__grid">
+        <div>
+          <div class="stat__number">5+</div>
+          <div class="stat__label">Service Packages</div>
+        </div>
+        <div>
+          <div class="stat__number">7</div>
+          <div class="stat__label">Training Steps</div>
+        </div>
+        <div>
+          <div class="stat__number">2</div>
+          <div class="stat__label">Languages</div>
+        </div>
+        <div>
+          <div class="stat__number">100%</div>
+          <div class="stat__label">Quality Reviewed</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SERVICES -->
+  <section class="section services" id="services">
+    <div class="container">
+      <div class="services__header reveal">
+        <div class="section__eyebrow">What We Deliver</div>
+        <h2 class="section__title">Data Annotation Services</h2>
+        <p class="section__sub">We provide structured, multi-level annotation workflows with clear documentation and client-focused communication.</p>
+      </div>
+      <div class="services__grid reveal">
+        <div class="service-card">
+          <div class="service-card__icon">📝</div>
+          <h3 class="service-card__title">Text Annotation</h3>
+          <p class="service-card__desc">Sentiment, intent, NER, topic classification, and content moderation for LLM training and NLP systems.</p>
+          <div class="service-card__tags">
+            <span class="tag">Sentiment</span>
+            <span class="tag">Intent</span>
+            <span class="tag">NER</span>
+            <span class="tag">LLM</span>
+          </div>
+        </div>
+        <div class="service-card">
+          <div class="service-card__icon">🖼️</div>
+          <h3 class="service-card__title">Image Annotation</h3>
+          <p class="service-card__desc">Bounding boxes, segmentation, keypoints, and object detection for computer vision and autonomous systems.</p>
+          <div class="service-card__tags">
+            <span class="tag">COCO</span>
+            <span class="tag">YOLO</span>
+            <span class="tag">Pascal VOC</span>
+          </div>
+        </div>
+        <div class="service-card">
+          <div class="service-card__icon">🎵</div>
+          <h3 class="service-card__title">Audio Annotation</h3>
+          <p class="service-card__desc">Transcription, speaker identification, sentiment detection, and sound classification for voice AI.</p>
+          <div class="service-card__tags">
+            <span class="tag">Transcription</span>
+            <span class="tag">Speaker ID</span>
+            <span class="tag">ASR</span>
+          </div>
+        </div>
+        <div class="service-card">
+          <div class="service-card__icon">🎬</div>
+          <h3 class="service-card__title">Video Annotation</h3>
+          <p class="service-card__desc">Object tracking, activity recognition, frame classification, and event detection across video datasets.</p>
+          <div class="service-card__tags">
+            <span class="tag">Tracking</span>
+            <span class="tag">Activity</span>
+            <span class="tag">Events</span>
+          </div>
+        </div>
+        <div class="service-card">
+          <div class="service-card__icon">✅</div>
+          <h3 class="service-card__title">Dataset QA</h3>
+          <p class="service-card__desc">Independent validation of existing annotated datasets — accuracy checks, label consistency, and error correction.</p>
+          <div class="service-card__tags">
+            <span class="tag">Validation</span>
+            <span class="tag">IAA</span>
+            <span class="tag">Audit</span>
+          </div>
+        </div>
+        <div class="service-card">
+          <div class="service-card__icon">🛡️</div>
+          <h3 class="service-card__title">Content Moderation</h3>
+          <p class="service-card__desc">Text, image, and video moderation with trust and safety operations, policy enforcement, and human-in-the-loop review.</p>
+          <div class="service-card__tags">
+            <span class="tag">Trust & Safety</span>
+            <span class="tag">HITL</span>
+            <span class="tag">Policy</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PLATFORM FLOW -->
+  <section class="section flow" id="platform">
+    <div class="container">
+      <div class="services__header reveal">
+        <div class="section__eyebrow">Annotator Training</div>
+        <h2 class="section__title">The 7-Step Candidate Journey</h2>
+        <p class="section__sub">Every annotator we certify passes through a rigorous screening and training pipeline — no shortcuts.</p>
+      </div>
+      <div class="flow__steps reveal">
+        <div class="flow__step flow__step--active">
+          <div class="flow__step-num"></div>
+          <div class="flow__step-body">
+            <div class="flow__step-title">Registration <span class="badge badge--live">Live</span></div>
+            <p class="flow__step-desc">Candidates submit their profile, CV, and background via a secure intake form.</p>
+          </div>
+        </div>
+        <div class="flow__step flow__step--active">
+          <div class="flow__step-num"></div>
+          <div class="flow__step-body">
+            <div class="flow__step-title">Video Introduction <span class="badge badge--live">Live</span></div>
+            <p class="flow__step-desc">A 1-minute recorded self-introduction screens for communication clarity and professionalism.</p>
+          </div>
+        </div>
+        <div class="flow__step flow__step--active">
+          <div class="flow__step-num"></div>
+          <div class="flow__step-body">
+            <div class="flow__step-title">English Grammar Test <span class="badge badge--live">Live</span></div>
+            <p class="flow__step-desc">Grammar accuracy test for annotation-quality written English.</p>
+          </div>
+        </div>
+        <div class="flow__step flow__step--active">
+          <div class="flow__step-num"></div>
+          <div class="flow__step-body">
+            <div class="flow__step-title">English Clarity Rewriting <span class="badge badge--live">Live</span></div>
+            <p class="flow__step-desc">Candidates rewrite unclear sentences to a professional annotation standard.</p>
+          </div>
+        </div>
+        <div class="flow__step flow__step--active">
+          <div class="flow__step-num"></div>
+          <div class="flow__step-body">
+            <div class="flow__step-title">LLM Evaluation Test <span class="badge badge--live">Live</span></div>
+            <p class="flow__step-desc">Rate AI responses, compare outputs, and identify hallucinations and policy violations.</p>
+          </div>
+        </div>
+        <div class="flow__step flow__step--soon">
+          <div class="flow__step-num"></div>
+          <div class="flow__step-body">
+            <div class="flow__step-title">Live Annotation Training <span class="badge badge--soon">Coming Soon</span></div>
+            <p class="flow__step-desc">Work on real annotation tasks using ADA's curated dataset across text, audio, images, and video.</p>
+          </div>
+        </div>
+        <div class="flow__step flow__step--soon">
+          <div class="flow__step-num"></div>
+          <div class="flow__step-body">
+            <div class="flow__step-title">ADA Certificate <span class="badge badge--soon">Coming Soon</span></div>
+            <p class="flow__step-desc">Receive a branded ADA certificate upon successful completion — shareable on LinkedIn.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHY ADA -->
+  <section class="section">
+    <div class="container">
+      <div class="services__header reveal">
+        <div class="section__eyebrow">Why ADA</div>
+        <h2 class="section__title">Built Different</h2>
+      </div>
+      <div class="why__grid reveal">
+        <div class="why-card">
+          <div class="why-card__icon">🌐</div>
+          <h3 class="why-card__title">Bilingual by Design</h3>
+          <p class="why-card__desc">Arabic-English specialists. We serve global AI teams who need genuine bilingual annotation expertise — not machine translation.</p>
+        </div>
+        <div class="why-card">
+          <div class="why-card__icon">🎯</div>
+          <h3 class="why-card__title">Multi-Level Quality Control</h3>
+          <p class="why-card__desc">Every dataset goes through structured annotation workflows with inter-annotator agreement checks and a final QA report.</p>
+        </div>
+        <div class="why-card">
+          <div class="why-card__icon">📋</div>
+          <h3 class="why-card__title">Clear Documentation</h3>
+          <p class="why-card__desc">You receive annotation guidelines, a quality report, and a final delivery package — not just raw files.</p>
+        </div>
+        <div class="why-card">
+          <div class="why-card__icon">⚡</div>
+          <h3 class="why-card__title">Flexible Project Sizes</h3>
+          <p class="why-card__desc">From small pilot datasets to large-scale annotation projects. We scale to your needs with consistent standards.</p>
+        </div>
+        <div class="why-card">
+          <div class="why-card__icon">🤝</div>
+          <h3 class="why-card__title">Client-First Communication</h3>
+          <p class="why-card__desc">Progress updates throughout the project. You always know where your dataset stands.</p>
+        </div>
+        <div class="why-card">
+          <div class="why-card__icon">🏅</div>
+          <h3 class="why-card__title">Certified Annotators</h3>
+          <p class="why-card__desc">Our training platform ensures every annotator is screened, trained, and certified before touching your data.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA BAND -->
+  <section class="section cta-band">
+    <div class="cta-band__glow"></div>
+    <div class="container">
+      <div class="cta-band__inner reveal">
+        <h2 class="cta-band__title">Ready to Build Better AI Data?</h2>
+        <p class="cta-band__sub">Whether you're an AI company needing annotated datasets or a bilingual professional ready to join our annotator pipeline — start here.</p>
+        <div class="cta-band__actions">
+          <a href="register.html" class="btn btn--primary">Join as Annotator</a>
+          <a href="#contact" class="btn btn--ghost">Contact for Services</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="section" id="contact">
+    <div class="container">
+      <div class="contact__grid">
+        <div class="reveal">
+          <div class="contact__label">Get in Touch</div>
+          <h2 class="contact__title">Need Data Annotation Services?</h2>
+          <p class="contact__desc">
+            If your organization needs high-quality annotated datasets — text, image, audio, or video — we'd like to hear about your project. Tell us what you're building and we'll get back to you with a proposal.
+          </p>
+          <p class="contact__desc" style="font-size:0.85rem;">
+            Payment details available upon inquiry. We support Wise (USD) and additional methods coming soon.
+          </p>
+          <a href="mailto:batoul.hassaballa@gmail.com" class="contact__email">
+            ✉ batoul.hassaballa@gmail.com
+          </a>
+        </div>
+        <div class="reveal">
+          <div class="contact__form-wrap">
+            <div class="contact__form-title">Send a Project Inquiry</div>
+            <form id="clientForm">
+              <div class="form-field">
+                <label for="c-name">Your Name</label>
+                <input type="text" id="c-name" placeholder="Jane Smith" required />
+              </div>
+              <div class="form-field">
+                <label for="c-email">Email Address</label>
+                <input type="email" id="c-email" placeholder="jane@company.com" required />
+              </div>
+              <div class="form-field">
+                <label for="c-company">Company / Organization</label>
+                <input type="text" id="c-company" placeholder="Your company name" />
+              </div>
+              <div class="form-field">
+                <label for="c-service">Service Needed</label>
+                <select id="c-service">
+                  <option value="">Select a service</option>
+                  <option>Text Annotation</option>
+                  <option>Image Annotation</option>
+                  <option>Audio Annotation</option>
+                  <option>Video Annotation</option>
+                  <option>Dataset QA / Validation</option>
+                  <option>Content Moderation</option>
+                  <option>Other / Multiple</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label for="c-message">Project Details</label>
+                <textarea id="c-message" placeholder="Tell us about your project — dataset size, language, timeline, and any specific requirements."></textarea>
+              </div>
+              <button type="submit" class="form__submit">Send Inquiry</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div>
+          <div class="footer__brand-logo">
+            <img src="ADA-Logo.png" alt="ADA" />
+            <span class="footer__brand-name"><span>ADA</span> Accurate Data Annotator</span>
+          </div>
+          <p class="footer__tagline">Annotation · Labeling · Evaluation · Training</p>
+          <div class="footer__social">
+            <a href="https://www.facebook.com/profile.php?id=61572122864005" target="_blank" rel="noopener">FB</a>
+            <a href="https://www.linkedin.com/company/accurate-data-annotator/" target="_blank" rel="noopener">LI</a>
+            <a href="https://x.com/ADataAnnotator" target="_blank" rel="noopener">X</a>
+            <a href="https://www.instagram.com/adataannotator/" target="_blank" rel="noopener">IG</a>
+            <a href="https://github.com/AccurateDataAnnotator" target="_blank" rel="noopener">GH</a>
+            <a href="https://www.youtube.com/@AccurateDataAnnotator" target="_blank" rel="noopener">YT</a>
+          </div>
+        </div>
+        <div class="footer__col">
+          <div class="footer__col-title">Platform</div>
+          <ul>
+            <li><a href="register.html">Register</a></li>
+            <li><a href="#platform">Training Steps</a></li>
+            <li><a href="#" style="opacity:0.4;pointer-events:none;">Assessments (Soon)</a></li>
+            <li><a href="#" style="opacity:0.4;pointer-events:none;">Certificate (Soon)</a></li>
+          </ul>
+        </div>
+        <div class="footer__col">
+          <div class="footer__col-title">Services</div>
+          <ul>
+            <li><a href="#services">Text Annotation</a></li>
+            <li><a href="#services">Image Annotation</a></li>
+            <li><a href="#services">Audio Annotation</a></li>
+            <li><a href="#services">Video Annotation</a></li>
+            <li><a href="#services">Dataset QA</a></li>
+          </ul>
+        </div>
+        <div class="footer__col">
+          <div class="footer__col-title">Contact</div>
+          <ul>
+            <li><a href="mailto:batoul.hassaballa@gmail.com">Email Us</a></li>
+            <li><a href="https://accuratedataannotator.com" target="_blank">Main Website</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer__bottom">
+        <span class="footer__copy">© 2026 Accurate Data Annotator. All rights reserved.</span>
+        <span class="footer__domain">accuratedataannotator.com</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Mobile nav toggle
+    const toggle = document.getElementById('navToggle');
+    const links = document.getElementById('navLinks');
+    toggle.addEventListener('click', () => links.classList.toggle('open'));
+
+    // Close nav on link click
+    links.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => links.classList.remove('open'));
+    });
+
+    // Scroll reveal
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+      });
+    }, { threshold: 0.12 });
+    reveals.forEach(r => observer.observe(r));
+
+    // Contact form → mailto
+    document.getElementById('clientForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = document.getElementById('c-name').value;
+      const company = document.getElementById('c-company').value;
+      const service = document.getElementById('c-service').value;
+      const message = document.getElementById('c-message').value;
+      const subject = encodeURIComponent(`ADA Service Inquiry — ${service || 'Data Annotation'}`);
+      const body = encodeURIComponent(
+        `Name: ${name}\nCompany: ${company}\nService: ${service}\n\nProject Details:\n${message}`
+      );
+      window.location.href = `mailto:batoul.hassaballa@gmail.com?subject=${subject}&body=${body}`;
+    });
+  </script>
+</body>
+</html>
