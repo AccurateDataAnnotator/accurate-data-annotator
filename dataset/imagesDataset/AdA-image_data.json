@@ -1,0 +1,24 @@
+{
+  "image_data": {
+    "title": "Image Datasets",
+    "description": "Visual corpus optimized for bounding boxes, object detection, and classification tracking.",
+    "base_path": "./dataset/imageDataset/",
+    "items": [
+      { "id": "img_01", "title": "Patient Lying in Hospital Bed with Nurse Checking Vitals", "category": "Healthcare/Medical", "file_name": "patient_bed_nurse.jpg" },
+      { "id": "img_02", "title": "Doctor Examining a Child in a Hospital Room", "category": "Healthcare/Medical", "file_name": "doctor_examining_child.jpg" },
+      { "id": "img_03", "title": "Teacher Standing in Front of a Classroom Teaching Students", "category": "Education/Classroom", "file_name": "teacher_classroom.jpg" },
+      { "id": "img_04", "title": "Student Reading a Book at a Desk in a School Library", "category": "Education/Classroom", "file_name": "student_library.jpg" },
+      { "id": "img_05", "title": "Family Eating Dinner Together at Home in the Dining Room", "category": "Domestic/Daily Life", "file_name": "family_dinner.jpg" },
+      { "id": "img_06", "title": "Person Drinking Coffee at a Kitchen Table in the Morning", "category": "Domestic/Daily Life", "file_name": "morning_coffee.jpg" },
+      { "id": "img_07", "title": "Woman Relaxing on a Sofa Watching TV at Home", "category": "Domestic/Daily Life", "file_name": "relaxing_watching_tv.jpg" },
+      { "id": "img_08", "title": "Busy City Street Intersection with Moving Cars and Traffic Lights", "category": "Traffic/Urban Scene", "file_name": "traffic_intersection.jpg" },
+      { "id": "img_09", "title": "Pedestrian Crossing a Busy Road at a Crosswalk", "category": "Traffic/Urban Scene", "file_name": "pedestrian_crosswalk.jpg" },
+      { "id": "img_10", "title": "Man Waiting at a Bus Stop in an Urban Area", "category": "Traffic/Urban Scene", "file_name": "bus_stop_waiting.jpg" },
+      { "id": "img_11", "title": "Elderly Person Walking with a Cane in a Park", "category": "Leisure/Outdoor", "file_name": "elderly_park_walk.jpg" },
+      { "id": "img_12", "title": "Young Woman Using a Laptop while Sitting on her Bed", "category": "Domestic/Daily Life", "file_name": "laptop_on_bed.jpg" },
+      { "id": "img_13", "title": "Children Playing Soccer in a School Playground", "category": "Leisure/Outdoor", "file_name": "children_soccer_playground.jpg" },
+      { "id": "img_14", "title": "Chef Cooking in a Restaurant Kitchen", "category": "Commercial/Workplace", "file_name": "chef_cooking_kitchen.jpg" },
+      { "id": "img_15", "title": "Shopper Carrying Bags Inside a Busy Shopping Mall", "category": "Commercial/Workplace", "file_name": "shopper_shopping_mall.jpg" }
+    ]
+  }
+}
