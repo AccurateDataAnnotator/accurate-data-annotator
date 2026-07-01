@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADA - Bilingual LLM Evaluation Assessment</title>
+    <!-- Font Awesome Personal Kit Link -->
+    <script src="https://kit.fontawesome.com/4845bc06da.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="zunoon.css">
+</head>
+<body>
+
+    <!-- Navigation Header -->
+    <header id="main-header">
+        <nav class="navbar">
+            <div class="nav-container">
+                <a href="index.html" class="nav-logo">
+                    <img src="https://raw.githubusercontent.com/AccurateDataAnnotator/accurate-data-annotator/main/ADALogo/ADA-Logo.png" alt="ADA Logo" class="logo-img">
+                </a>
+                <ul class="nav-menu">
+                    <li><a href="index.html" class="nav-link">Home</a></li>
+                    <li><a href="register.html" class="nav-link">Get Started</a></li>
+                    <li><a href="screening.html" class="nav-link">Screening</a></li>
+                    <li><a href="English-test.html" class="nav-link">English Test</a></li>
+                    <li><a href="llm.html" class="nav-link">LLM Evaluation (English)</a></li>
+                    <li><a href="bilingual-llm.html" class="nav-link active">LLM Evaluation (Bilingual)</a></li>
+                    <li><a href="training.html" class="nav-link">Live Training</a></li>
+                    <li><a href="certificate.html" class="nav-link">Certificate</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Bilingual LLM Diagnostic Assessment -->
+    <main id="main-content">
+        <section id="llm-assessment-hub">
+            <h2>Bilingual Arabic-English LLM Evaluation Assessment</h2>
+            <p>
+                This assessment is for candidates applying to the <strong>bilingual Arabic-English</strong> annotation path.
+                Each question is shown in English and Arabic. You may answer in either language.
+            </p>
+            <p dir="rtl" lang="ar" style="margin-top:-8px;">
+                هذا التقييم مخصص للمرشحين المتقدمين لمسار التصنيف ثنائي اللغة (عربي-إنجليزي). تظهر كل سؤال بالإنجليزية والعربية، ويمكنك الإجابة بأي من اللغتين.
+            </p>
+
+            <form id="bilingual-llm-form" action="#" method="POST">
+                <ol class="llm-questions-list">
+                    <li>
+                        <label class="q-label">1. What does the abbreviation &#x27;LLM&#x27; stand for?</label>
+                        <label class="q-label-ar" dir="rtl" lang="ar">ماذا يعني الاختصار &#x27;LLM&#x27;؟</label>
+                        <input type="text" name="bllm_q1" placeholder="Your answer / إجابتك...">
+                    </li>
+                    <li>
+                        <label class="q-label">2. A large language model is trained only on labeled tabular spreadsheets.</label>
+                        <label class="q-label-ar" dir="rtl" lang="ar">النموذج اللغوي الكبير يُدرَّب فقط على جداول بيانات مصنّفة.</label>
+                        <div class="radio-opts">
+                            <label><input type="radio" name="bllm_q2" value="true"> True / صحيح</label>
+                            <label><input type="radio" name="bllm_q2" value="false"> False / خطأ</label>
+                        </div>
+                    </li>
+                    <li>
+                        <label class="q-label">3. What is a &#x27;token&#x27; in the context of language models?</label>
+                        <label class="q-label-ar" dir="rtl" lang="ar">ما المقصود بـ &#x27;Token&#x27; (الوحدة اللغوية) في سياق نماذج اللغة؟</label>
+                        <input type="text" name="bllm_q3" placeholder="Your answer / إجابتك...">
+                    </li>
+                    <li>
+                        <label class="q-label">4. Explain in your own words what &#x27;fine-tuning&#x27; means for an LLM.</label>
+                        <label class="q-label-ar" dir="rtl" lang="ar">اشرح بكلماتك الخاصة معنى &#x27;الضبط الدقيق&#x27; (Fine-tuning) لنموذج لغوي.</label>
+                        <textarea name="bllm_q4" rows="2" placeholder="Your answer / إجابتك..."></textarea>
+                    </li>
+                    <li>
+                        <label class="q-label">5. GPT-4, Claude, and Gemini are all examples of large language models.</label>
+                        <label class="q-label-ar" dir="rtl" lang="ar">GPT-4 وClaude وGemini كلها أمثلة على نماذج لغوية كبيرة.</label>
+                        <div class="radio-opts">
+                            <label><input type="radio" name="bllm_q5" value="true"> True / صحيح</label>
+                            <label><input type="radio" name="bllm_q5" value="false"> False / خطأ</label>
+                        </div>
+                    </li>
+                    <li>
+                        <label class="q-label">6. What is &#x27;prompt engineering&#x27;?</label>
+                        <label class="q-label-ar" dir="rtl" lang="ar">ما هي &#x27;هندسة الأوامر&#x27; (Prompt Engineering)؟</label>
+                        <input type="text" name="bllm_q6" placeholder="Your answer / إجابتك...">
+                    </li>
+                    <li>
+                        <label class="q-label">7. The &#x27;context window&#x27; of an LLM refers to the maximum amount of text it can process in a single interaction.</label>
+                        <label class="q-label-ar" dir="rtl" lang="ar">تشير &#x27;نافذة السياق&#x27; لنموذج اللغة إلى أقصى كمية نص يمكنه معالجتها في تفاعل واحد.</label>
+                        <div class="radio-opts">
+                            <label><input type="radio" name="bllm_q7" value="true"> True / صحيح</label>
+                            <label><input type="radio" name="bllm_q7" value="false"> False / خطأ</label>
+                        </div>
+                    </li>
+                    <li>
+                        <label class="q-label">8. What does &#x27;hallucination&#x27; mean when evaluating an LLM response?</label>
+                        <label class="q-label-ar" dir="rtl" lang="ar">ماذا يعني مصطلح &#x27;الهلوسة&#x27; (Hallucination) عند تقييم استجابة نموذج لغوي؟</label>
+                        <input type="text" name="bllm_q8" placeholder="Your answer / إجابتك...">
+                    </li>
+                    <li>
+                        <label class="q-label">9. A response can be fluent and well-written but still factually incorrect.</label>
+                        <label class="q-label-ar" dir="rtl" lang="ar">يمكن أن تكون الاستجابة سليمة لغوياً ومكتوبة جيداً لكنها غير صحيحة من الناحية الواقعية.</label>
+                        <div class="radio-opts">
+                            <label><input type="radio" name="bllm_q9" value="true"> True / صحيح</label>
+                            <label><input type="radio" name="bllm_q9" value="false"> False / خطأ</label>
+                        </div>
+                    </li>
+                    <li>
+                        <label class="q-label">10. What is the difference between &#x27;relevance&#x27; and &#x27;accuracy&#x27; when rating a model response?</label>
+                        <label class="q-label-ar" dir="rtl" lang="ar">ما الفرق بين &#x27;الملاءمة&#x27; (Relevance) و&#x27;الدقة&#x27; (Accuracy) عند تقييم استجابة النموذج؟</label>
+                        <textarea name="bllm_q10" rows="2" placeholder="Your answer / إجابتك..."></textarea>
+                    </li>
+                    <li>
+                        <label class="q-label">11. What does RLHF stand for?</label>
+                        <label class="q-label-ar" dir="rtl" lang="ar">ماذا يعني الاختصار RLHF؟</label>
+                        <input type="text" name="bllm_q11" placeholder="Your answer / إجابتك...">
+                    </li>
+                    <li>
+                        <label class="q-label">12. Annotators should apply the same evaluation criteria consistently, regardless of the response&#x27;s language.</label>
+                        <label class="q-label-ar" dir="rtl" lang="ar">يجب على المُصنِّفين تطبيق معايير التقييم نفسها بثبات، بغض النظر عن لغة الاستجابة.</label>
+                        <div class="radio-opts">
+                            <label><input type="radio" name="bllm_q12" value="true"> True / صحيح</label>
+                            <label><input type="radio" name="bllm_q12" value="false"> False / خطأ</label>
+                        </div>
+                    </li>
+                    <li>
+                        <label class="q-label">13. When annotating bilingual Arabic-English text, what is &#x27;code-switching&#x27;?</label>
+                        <label class="q-label-ar" dir="rtl" lang="ar">عند تصنيف نص ثنائي اللغة (عربي-إنجليزي)، ما المقصود بـ &#x27;تبديل الشيفرة اللغوية&#x27; (Code-switching)؟</label>
+                        <input type="text" name="bllm_q13" placeholder="Your answer / إجابتك...">
+                    </li>
+                    <li>
+                        <label class="q-label">14. Translate the following customer comment into English: &#x27;المنتج وصل متأخراً لكن الجودة كانت ممتازة.&#x27;</label>
+                        <label class="q-label-ar" dir="rtl" lang="ar">ترجم التعليق التالي إلى الإنجليزية: &#x27;المنتج وصل متأخراً لكن الجودة كانت ممتازة.&#x27;</label>
+                        <textarea name="bllm_q14" rows="2" placeholder="Your answer / إجابتك..."></textarea>
+                    </li>
+                    <li>
+                        <label class="q-label">15. Arabic dialectal text (e.g. Egyptian colloquial) should always be normalized to Modern Standard Arabic before annotation.</label>
+                        <label class="q-label-ar" dir="rtl" lang="ar">يجب دائماً تحويل النص العامي العربي (مثل اللهجة المصرية) إلى الفصحى قبل التصنيف.</label>
+                        <div class="radio-opts">
+                            <label><input type="radio" name="bllm_q15" value="true"> True / صحيح</label>
+                            <label><input type="radio" name="bllm_q15" value="false"> False / خطأ</label>
+                        </div>
+                    </li>
+                    <li>
+                        <label class="q-label">16. What is &#x27;sentiment classification&#x27; and give one example label.</label>
+                        <label class="q-label-ar" dir="rtl" lang="ar">ما هو &#x27;تصنيف المشاعر&#x27; (Sentiment Classification)؟ اذكر مثالاً على تصنيف واحد.</label>
+                        <input type="text" name="bllm_q16" placeholder="Your answer / إجابتك...">
+                    </li>
+                    <li>
+                        <label class="q-label">17. Named Entity Recognition (NER) tags spans of text such as names, locations, and organizations.</label>
+                        <label class="q-label-ar" dir="rtl" lang="ar">يقوم التعرف على الكيانات المسمّاة (NER) بوسم أجزاء من النص مثل الأسماء والأماكن والمؤسسات.</label>
+                        <div class="radio-opts">
+                            <label><input type="radio" name="bllm_q17" value="true"> True / صحيح</label>
+                            <label><input type="radio" name="bllm_q17" value="false"> False / خطأ</label>
+                        </div>
+                    </li>
+                    <li>
+                        <label class="q-label">18. If you are unsure about the correct label for a sample, what should you do?</label>
+                        <label class="q-label-ar" dir="rtl" lang="ar">إذا لم تكن متأكداً من التصنيف الصحيح لعينة ما، ماذا يجب أن تفعل؟</label>
+                        <input type="text" name="bllm_q18" placeholder="Your answer / إجابتك...">
+                    </li>
+                    <li>
+                        <label class="q-label">19. What is &#x27;content moderation&#x27; in the context of data annotation?</label>
+                        <label class="q-label-ar" dir="rtl" lang="ar">ما المقصود بـ &#x27;الإشراف على المحتوى&#x27; (Content Moderation) في سياق تصنيف البيانات؟</label>
+                        <input type="text" name="bllm_q19" placeholder="Your answer / إجابتك...">
+                    </li>
+                    <li>
+                        <label class="q-label">20. A response that ignores part of a multi-part instruction should still receive full marks for completeness.</label>
+                        <label class="q-label-ar" dir="rtl" lang="ar">الاستجابة التي تتجاهل جزءاً من تعليمات متعددة الأجزاء يجب أن تحصل مع ذلك على الدرجة الكاملة في الاكتمال.</label>
+                        <div class="radio-opts">
+                            <label><input type="radio" name="bllm_q20" value="true"> True / صحيح</label>
+                            <label><input type="radio" name="bllm_q20" value="false"> False / خطأ</label>
+                        </div>
+                    </li>
+                    <li>
+                        <label class="q-label">21. What does &#x27;grounding&#x27; mean when evaluating an LLM&#x27;s factual claims?</label>
+                        <label class="q-label-ar" dir="rtl" lang="ar">ماذا يعني &#x27;الإسناد الواقعي&#x27; (Grounding) عند تقييم الادعاءات الواقعية لنموذج لغوي؟</label>
+                        <input type="text" name="bllm_q21" placeholder="Your answer / إجابتك...">
+                    </li>
+                    <li>
+                        <label class="q-label">22. Annotate the sentiment of this review as Positive, Negative, or Neutral: &#x27;الخدمة كانت بطيئة جداً ولم أعجب بالتجربة.&#x27;</label>
+                        <label class="q-label-ar" dir="rtl" lang="ar">صنّف مشاعر هذا التقييم إلى إيجابي أو سلبي أو محايد: &#x27;الخدمة كانت بطيئة جداً ولم أعجب بالتجربة.&#x27;</label>
+                        <input type="text" name="bllm_q22" placeholder="Your answer / إجابتك...">
+                    </li>
+                    <li>
+                        <label class="q-label">23. Increasing an LLM&#x27;s &#x27;temperature&#x27; setting makes its output more random and less deterministic.</label>
+                        <label class="q-label-ar" dir="rtl" lang="ar">زيادة إعداد &#x27;درجة الحرارة&#x27; (Temperature) لنموذج اللغة تجعل مخرجاته أكثر عشوائية وأقل ثباتاً.</label>
+                        <div class="radio-opts">
+                            <label><input type="radio" name="bllm_q23" value="true"> True / صحيح</label>
+                            <label><input type="radio" name="bllm_q23" value="false"> False / خطأ</label>
+                        </div>
+                    </li>
+                    <li>
+                        <label class="q-label">24. What is the purpose of a QA (Quality Assurance) pass after initial annotation?</label>
+                        <label class="q-label-ar" dir="rtl" lang="ar">ما الغرض من مرحلة ضمان الجودة (QA) بعد عملية التصنيف الأولية؟</label>
+                        <input type="text" name="bllm_q24" placeholder="Your answer / إجابتك...">
+                    </li>
+                    <li>
+                        <label class="q-label">25. Why is consistency important when multiple annotators label the same dataset?</label>
+                        <label class="q-label-ar" dir="rtl" lang="ar">لماذا يُعدّ الاتساق مهماً عندما يقوم عدة مُصنِّفين بتصنيف نفس مجموعة البيانات؟</label>
+                        <textarea name="bllm_q25" rows="2" placeholder="Your answer / إجابتك..."></textarea>
+                    </li>
+                    <li>
+                        <label class="q-label">26. A &#x27;system prompt&#x27; sets the behavior and role of an LLM before the user&#x27;s first message.</label>
+                        <label class="q-label-ar" dir="rtl" lang="ar">يحدد &#x27;أمر النظام&#x27; (System Prompt) سلوك ودور نموذج اللغة قبل أول رسالة من المستخدم.</label>
+                        <div class="radio-opts">
+                            <label><input type="radio" name="bllm_q26" value="true"> True / صحيح</label>
+                            <label><input type="radio" name="bllm_q26" value="false"> False / خطأ</label>
+                        </div>
+                    </li>
+                    <li>
+                        <label class="q-label">27. When flagging a response as a &#x27;failure case,&#x27; what information should you include in your notes?</label>
+                        <label class="q-label-ar" dir="rtl" lang="ar">عند وسم استجابة كـ &#x27;حالة فشل&#x27;، ما المعلومات التي يجب تضمينها في ملاحظاتك؟</label>
+                        <input type="text" name="bllm_q27" placeholder="Your answer / إجابتك...">
+                    </li>
+                    <li>
+                        <label class="q-label">28. What is the difference between Modern Standard Arabic (MSA) and a regional Arabic dialect, and why does this matter for annotation?</label>
+                        <label class="q-label-ar" dir="rtl" lang="ar">ما الفرق بين العربية الفصحى الحديثة (MSA) ولهجة عربية إقليمية، ولماذا يهم هذا في عملية التصنيف؟</label>
+                        <textarea name="bllm_q28" rows="2" placeholder="Your answer / إجابتك..."></textarea>
+                    </li>
+                    <li>
+                        <label class="q-label">29. An annotation guideline document should include label definitions, rules, and edge case examples.</label>
+                        <label class="q-label-ar" dir="rtl" lang="ar">يجب أن تتضمن وثيقة إرشادات التصنيف تعريفات التصنيفات والقواعد وأمثلة على الحالات الاستثنائية.</label>
+                        <div class="radio-opts">
+                            <label><input type="radio" name="bllm_q29" value="true"> True / صحيح</label>
+                            <label><input type="radio" name="bllm_q29" value="false"> False / خطأ</label>
+                        </div>
+                    </li>
+                    <li>
+                        <label class="q-label">30. If a model response is fluent in English but contains an awkward, literal Arabic translation, how would you rate it for &#x27;naturalness&#x27;?</label>
+                        <label class="q-label-ar" dir="rtl" lang="ar">إذا كانت استجابة النموذج سليمة بالإنجليزية لكنها تحتوي على ترجمة عربية حرفية وركيكة، كيف تقيّمها من حيث &#x27;الطبيعية اللغوية&#x27;؟</label>
+                        <textarea name="bllm_q30" rows="2" placeholder="Your answer / إجابتك..."></textarea>
+                    </li>
+                </ol>
+                <button type="submit" class="btn btn-submit-llm">Submit Assessment / إرسال التقييم</button>
+            </form>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer id="main-footer">
+        <div class="footer-container">
+            <p>&copy; 2026 Accurate Data Annotator.</p>
+        </div>
+    </footer>
+
+    <script src="zunoon.js"></script>
+</body>
+</html>
