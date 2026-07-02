@@ -107,7 +107,7 @@ h1, h2, h3, h4, h5 {
 }
 
 .nav-logo::after {
-  content: 'Zunoon';
+  content: 'ADA';
   font-family: var(--font-head);
   font-size: 15.5px;
   font-weight: 600;
