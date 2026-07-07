@@ -25,23 +25,36 @@
                     <li><a href="llm.html" class="nav-link">LLM Eval (English)</a></li>
                     <li><a href="bilingual-llm.html" class="nav-link">LLM Eval (Bilingual)</a></li>
                     <li><a href="training.html" class="nav-link active">Live Training</a></li>
+                    <li><a href="library.html" class="nav-link">Library</a></li>
                     <li><a href="certificate.html" class="nav-link">Certificate</a></li>
                 </ul>
             </div>
         </nav>
     </header>
 
+    <div id="journey-tracker"></div>
+
     <!-- Interactive Workspace for Live Cohort Training -->
     <main id="main-content">
         <section id="training-workspace">
             <h2>Live Annotations Training Module</h2>
-            <p>Access your real-time data streaming dashboard, view cohort interaction notes, and review ongoing guidelines updates here.</p>
-            
-            <div class="live-stream-placeholder">
-                <div class="placeholder-icon">
-                    <i class="fa-solid fa-chalkboard-user"></i>
+            <p>Annotate real samples pulled live from ADA's production dataset repository, then compare your answers against the reference (gold) labels.</p>
+
+            <!-- Modality Tabs: wired by zunoon.js -->
+            <div id="modality-tabs">
+                <button class="modality-tab" data-modality="text"><i class="fa-solid fa-comment-dots"></i>Text</button>
+                <button class="modality-tab" data-modality="image"><i class="fa-solid fa-image"></i>Image</button>
+                <button class="modality-tab" data-modality="audio"><i class="fa-solid fa-microphone"></i>Audio</button>
+                <button class="modality-tab" data-modality="video"><i class="fa-solid fa-video"></i>Video</button>
+                <button class="modality-tab" data-modality="multimodal"><i class="fa-solid fa-layer-group"></i>Multimodal</button>
+            </div>
+            <p class="dataset-source-note" id="dataset-source-note"></p>
+
+            <div id="training-modality-root">
+                <div class="modality-loading">
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                    Loading live dataset from the ADA GitHub repository&hellip;
                 </div>
-                <p>Live Streaming Feed / Interactive Sandbox Simulation Workspace</p>
             </div>
         </section>
     </main>
