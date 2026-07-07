@@ -25,22 +25,44 @@
                     <li><a href="llm.html" class="nav-link">LLM Eval (English)</a></li>
                     <li><a href="bilingual-llm.html" class="nav-link">LLM Eval (Bilingual)</a></li>
                     <li><a href="training.html" class="nav-link">Live Training</a></li>
+                    <li><a href="library.html" class="nav-link">Library</a></li>
                     <li><a href="certificate.html" class="nav-link">Certificate</a></li>
                 </ul>
             </div>
         </nav>
     </header>
 
+    <div id="journey-tracker"></div>
+
     <!-- Registration Gateway Main Content -->
     <main id="main-content" class="container-center">
         <section id="registration-gateway">
             <h2>Onboarding Registration</h2>
-            <p>Please click the button below to fill out the official enrollment application form and join our training track.</p>
-            
-            <div class="action-box">
-                <a href="https://docs.google.com/forms/d/e/1FAIpQLScfqdBhbV3Egj5fHU6ScqV1W0chAoA2L-x251EytD04vistKg/viewform?usp=publish-editor" target="_blank" class="btn btn-action">
+            <p>ADA's training track is invitation-only. Enter the invitation code you received from our team to unlock the enrollment form.</p>
+
+            <div id="invite-gate">
+                <h3><i class="fa-solid fa-lock"></i> Invitation Required</h3>
+                <p>Selected candidates receive a code by email after their application is reviewed. Don't have one yet? Reach out via our <a href="index.html#contact-section" style="color:var(--red);text-decoration:underline;">contact form</a>.</p>
+                <input type="text" id="invite-code-input" placeholder="Enter invitation code" autocomplete="off">
+                <button class="btn btn-primary" id="invite-submit-btn" style="width:100%;justify-content:center;">Unlock Registration</button>
+                <div id="invite-status"></div>
+            </div>
+
+            <div class="action-box locked" id="registration-action-box">
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLScfqdBhbV3Egj5fHU6ScqV1W0chAoA2L-x251EytD04vistKg/viewform?usp=publish-editor" target="_blank" class="btn btn-action" id="fill-application-link">
                     <i class="fa-solid fa-file-signature"></i> Fill Application Form
                 </a>
+
+                <div class="post-action-note" id="post-register-note" style="display:none;">
+                    <p>Already filled out and submitted the application form above?</p>
+                    <button class="btn btn-outline-dark" id="confirm-registration-btn">Yes, I've Submitted It — Continue</button>
+                </div>
+
+                <div class="confirmation-banner" id="register-confirmation-banner" style="display:none;">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span>Registration marked as submitted. Next up: identity verification screening.</span>
+                    <span class="banner-actions"><a href="screening.html" class="btn btn-primary" style="padding:8px 16px;">Continue to Screening →</a></span>
+                </div>
             </div>
         </section>
     </main>
