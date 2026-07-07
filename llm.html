@@ -25,11 +25,14 @@
                     <li><a href="llm.html" class="nav-link active">LLM Eval (English)</a></li>
                     <li><a href="bilingual-llm.html" class="nav-link">LLM Eval (Bilingual)</a></li>
                     <li><a href="training.html" class="nav-link">Live Training</a></li>
+                    <li><a href="library.html" class="nav-link">Library</a></li>
                     <li><a href="certificate.html" class="nav-link">Certificate</a></li>
                 </ul>
             </div>
         </nav>
     </header>
+
+    <div id="journey-tracker"></div>
 
     <!-- LLM Diagnostic Assessment Grid -->
     <main id="main-content">
@@ -37,619 +40,631 @@
             <h2>Large Language Model (LLM) Evaluation Core Assessment</h2>
             <p>Complete the core conceptual evaluation matrix covering quality dimensions, alignment metrics, safety compliance, and language considerations.</p>
             
+            <div class="llm-level-toggle" id="llm-level-toggle">
+                <button type="button" data-level-filter="all" class="active">Full Assessment</button>
+                <button type="button" data-level-filter="beginner">Foundations Track</button>
+                <button type="button" data-level-filter="advanced">Advanced Track</button>
+            </div>
+            <p class="llm-level-note">New to LLM evaluation? Start with the Foundations Track. Already familiar with RLHF, calibration, and rubric-based rating? Try the Advanced Track. You can switch anytime before submitting.</p>
+
             <form id="llm-evaluation-form" action="#" method="POST">
                 <ol class="llm-questions-list">
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">What does LLM stand for in the context of artificial intelligence?</label>
                         <input type="text" name="llm_q1" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Large language models are trained exclusively on structured tabular data.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q2" value="true"> True</label>
                             <label><input type="radio" name="llm_q2" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Which training objective is most commonly used to pre-train modern LLMs?</label>
                         <input type="text" name="llm_q3" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="advanced">
                         <label class="q-label">What is a 'token' in the context of language models?</label>
                         <input type="text" name="llm_q4" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">GPT-4, Claude, and Gemini are all examples of large language models.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q5" value="true"> True</label>
                             <label><input type="radio" name="llm_q5" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="advanced">
                         <label class="q-label">What is 'fine-tuning' in the context of LLMs?</label>
                         <textarea name="llm_q6" rows="2" placeholder="Explain fine-tuning..."></textarea>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Which of the following best describes 'prompt engineering'?</label>
-                        <input type="text" name="llm_q7" placeholder="Your answer...">
+                        <div class="radio-opts radio-opts-col">
+                            <label><input type="radio" name="llm_q7" value="a"> A) Writing code to train a new model from scratch</label>
+                            <label><input type="radio" name="llm_q7" value="b"> B) Crafting and refining input instructions to guide an LLM toward better outputs</label>
+                            <label><input type="radio" name="llm_q7" value="c"> C) Increasing a model's parameter count during inference</label>
+                            <label><input type="radio" name="llm_q7" value="d"> D) Manually correcting an LLM's output after it has been generated</label>
+                        </div>
                     </li>
-                    <li>
+                    <li data-level="advanced">
                         <label class="q-label">The 'context window' of an LLM refers to the maximum amount of text it can process in a single interaction.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q8" value="true"> True</label>
                             <label><input type="radio" name="llm_q8" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="advanced">
                         <label class="q-label">What is 'temperature' in LLM inference?</label>
                         <input type="text" name="llm_q9" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="advanced">
                         <label class="q-label">Which architecture underpins most modern large language models?</label>
                         <input type="text" name="llm_q10" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="advanced">
                         <label class="q-label">An LLM with a larger context window can 'remember' more information within a single conversation.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q11" value="true"> True</label>
                             <label><input type="radio" name="llm_q11" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="advanced">
                         <label class="q-label">What is 'zero-shot' prompting?</label>
                         <input type="text" name="llm_q12" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="advanced">
                         <label class="q-label">What is 'few-shot' prompting?</label>
                         <input type="text" name="llm_q13" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">LLMs can access the internet in real time by default.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q14" value="true"> True</label>
                             <label><input type="radio" name="llm_q14" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="advanced">
                         <label class="q-label">What does RLHF stand for?</label>
                         <input type="text" name="llm_q15" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Which of the following is NOT a known risk of LLMs?</label>
                         <input type="text" name="llm_q16" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Hallucination in LLMs refers to the model generating confident but factually incorrect information.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q17" value="true"> True</label>
                             <label><input type="radio" name="llm_q17" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="advanced">
                         <label class="q-label">What is a 'system prompt' in LLM usage?</label>
                         <input type="text" name="llm_q18" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="advanced">
                         <label class="q-label">What does 'grounding' mean in the context of LLMs?</label>
                         <input type="text" name="llm_q19" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="advanced">
                         <label class="q-label">Increasing the temperature parameter makes LLM outputs more deterministic.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q20" value="true"> True</label>
                             <label><input type="radio" name="llm_q20" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">A response is considered 'coherent' when it:</label>
                         <input type="text" name="llm_q21" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">When evaluating an LLM response for 'relevance', what are you checking?</label>
                         <input type="text" name="llm_q22" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">A factually correct response that doesn't answer the user's question is still considered a high-quality output.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q23" value="true"> True</label>
                             <label><input type="radio" name="llm_q23" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Which of these is a sign of a low-quality LLM response?</label>
                         <input type="text" name="llm_q24" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">What does 'fluency' refer to when rating an LLM response?</label>
                         <input type="text" name="llm_q25" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Verbosity (being excessively long) always improves response quality.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q26" value="true"> True</label>
                             <label><input type="radio" name="llm_q26" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">You are asked to rate two responses to the question 'How do I boil an egg?' Response A gives step-by-step instructions. Response B gives the history of eggs. Which is more relevant?</label>
                         <input type="text" name="llm_q27" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">What is 'instruction following' as an evaluation dimension?</label>
                         <input type="text" name="llm_q28" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">A response that contains accurate information but is rude or offensive is generally rated as high quality.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q29" value="true"> True</label>
                             <label><input type="radio" name="llm_q29" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">When a model is asked to 'summarize in 3 bullet points' but returns 10 paragraphs, this is a failure of:</label>
                         <input type="text" name="llm_q30" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Which rating scale format is most commonly used in LLM evaluation tasks?</label>
                         <input type="text" name="llm_q31" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">When comparing two model responses, your personal preference should be the sole basis for your rating.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q32" value="true"> True</label>
                             <label><input type="radio" name="llm_q32" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">A response that confidently states '2+2=5' is an example of:</label>
                         <input type="text" name="llm_q33" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">What should an evaluator do when both Response A and Response B are equally good?</label>
                         <input type="text" name="llm_q34" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Evaluators should apply consistent rating standards across all questions, regardless of topic.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q35" value="true"> True</label>
                             <label><input type="radio" name="llm_q35" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Which of the following best describes 'completeness' in output evaluation?</label>
                         <input type="text" name="llm_q36" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">A user asks 'What is the capital of Australia?' and the model answers 'Sydney.' This response is:</label>
                         <input type="text" name="llm_q37" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">When evaluating creative writing, grammar and factual accuracy are the only criteria that matter.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q38" value="true"> True</label>
                             <label><input type="radio" name="llm_q38" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="advanced">
                         <label class="q-label">What is 'calibration' in the context of LLM evaluation?</label>
                         <input type="text" name="llm_q39" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Which of the following is an example of a 'leading prompt' that could bias a model?</label>
                         <input type="text" name="llm_q40" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">An evaluator's job is to rate responses objectively based on defined quality criteria, not personal opinion.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q41" value="true"> True</label>
                             <label><input type="radio" name="llm_q41" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">If a model response is helpful but contains one minor factual error, the best approach is to:</label>
                         <input type="text" name="llm_q42" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">'Groundedness' in a response means:</label>
                         <input type="text" name="llm_q43" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">A model that repeats the same sentence multiple times in a response demonstrates good output quality.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q44" value="true"> True</label>
                             <label><input type="radio" name="llm_q44" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Which is the better response to 'Explain photosynthesis to a 10-year-old'? A: Uses simple analogies and short sentences. B: Uses biochemical terminology without explanation.</label>
                         <input type="text" name="llm_q45" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">What is 'model bias' in LLMs?</label>
                         <input type="text" name="llm_q46" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">LLMs trained on internet data may inherit societal biases present in that data.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q47" value="true"> True</label>
                             <label><input type="radio" name="llm_q47" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Which of the following is an example of gender bias in an LLM response?</label>
                         <input type="text" name="llm_q48" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">What is 'prompt injection'?</label>
                         <input type="text" name="llm_q49" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Safety filtering in LLMs aims to prevent the model from generating harmful or dangerous content.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q50" value="true"> True</label>
                             <label><input type="radio" name="llm_q50" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">A user asks an LLM for instructions on how to make a weapon. A well-aligned model should:</label>
                         <input type="text" name="llm_q51" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">What does 'content moderation' in LLM output evaluation involve?</label>
                         <input type="text" name="llm_q52" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">A response that is technically helpful but promotes illegal activity should be rated as high quality.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q53" value="true"> True</label>
                             <label><input type="radio" name="llm_q53" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Which of the following is an example of 'stereotype reinforcement' in an LLM?</label>
                         <input type="text" name="llm_q54" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">What is 'PII' and why is it important in LLM evaluation?</label>
                         <input type="text" name="llm_q55" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">An LLM that consistently outputs different quality for questions in different languages may exhibit language bias.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q56" value="true"> True</label>
                             <label><input type="radio" name="llm_q56" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">'Sycophancy' in an LLM means:</label>
                         <input type="text" name="llm_q57" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Which evaluation task involves checking if a model treats demographic groups consistently?</label>
                         <input type="text" name="llm_q58" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Evaluators should flag responses that contain hate speech even if the prompt asked for it.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q59" value="true"> True</label>
                             <label><input type="radio" name="llm_q59" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">What is a 'red-teaming' exercise in the context of AI?</label>
                         <input type="text" name="llm_q60" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Why is it important for LLM evaluators to maintain consistency across rating sessions?</label>
                         <textarea name="llm_q61" rows="2" placeholder="Provide evaluation justification..."></textarea>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">A model that changes its stated opinion when the user pushes back (without new evidence) is showing sycophantic behavior.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q62" value="true"> True</label>
                             <label><input type="radio" name="llm_q62" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Which of the following is NOT a safety concern in LLM outputs?</label>
                         <input type="text" name="llm_q63" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">When a response contains potentially sensitive information about a real person, an evaluator should:</label>
                         <input type="text" name="llm_q64" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="advanced">
                         <label class="q-label">LLM safety alignment techniques include both training-time and inference-time interventions.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q65" value="true"> True</label>
                             <label><input type="radio" name="llm_q65" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">What is the primary purpose of data annotation in AI development?</label>
                         <input type="text" name="llm_q66" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">High-quality annotations require clear guidelines and consistent application of those guidelines.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q67" value="true"> True</label>
                             <label><input type="radio" name="llm_q67" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Inter-annotator agreement (IAA) measures:</label>
                         <input type="text" name="llm_q68" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">When annotation guidelines are ambiguous, the best approach is to:</label>
                         <input type="text" name="llm_q69" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Rushing through annotation tasks to complete more items typically improves data quality.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q70" value="true"> True</label>
                             <label><input type="radio" name="llm_q70" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">What is a 'golden set' in annotation quality control?</label>
                         <input type="text" name="llm_q71" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Which of the following is an example of annotation bias?</label>
                         <input type="text" name="llm_q72" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Annotators should document uncertainty or edge cases rather than silently making arbitrary decisions.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q73" value="true"> True</label>
                             <label><input type="radio" name="llm_q73" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">In a preference annotation task, you are shown two AI responses and asked to pick the better one. If both are equally bad, you should:</label>
                         <input type="text" name="llm_q74" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Which factor most affects the quality of a human evaluation dataset?</label>
                         <input type="text" name="llm_q75" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">An annotator finding the topic boring is a valid reason to apply different quality standards.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q76" value="true"> True</label>
                             <label><input type="radio" name="llm_q76" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">What does it mean for annotation labels to be 'reproducible'?</label>
                         <input type="text" name="llm_q77" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Why is it important to re-read the annotation guidelines before starting each new session?</label>
                         <textarea name="llm_q78" rows="2" placeholder="Provide reason..."></textarea>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Annotation tasks involving subjective content (like tone or style) require clearer guidelines than objective tasks.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q79" value="true"> True</label>
                             <label><input type="radio" name="llm_q79" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Which of the following is a valid reason to flag an item during annotation?</label>
                         <input type="text" name="llm_q80" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="advanced">
                         <label class="q-label">Data annotation for RLHF (Reinforcement Learning from Human Feedback) typically involves:</label>
                         <input type="text" name="llm_q81" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Annotators are expected to apply guidelines even when they personally disagree with the criteria.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q82" value="true"> True</label>
                             <label><input type="radio" name="llm_q82" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">What is 'label leakage' in annotation?</label>
                         <input type="text" name="llm_q83" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">When annotating a response that is partially correct, you should:</label>
                         <input type="text" name="llm_q84" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Quality control checks (like audits of annotator work) are a normal part of professional annotation projects.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q85" value="true"> True</label>
                             <label><input type="radio" name="llm_q85" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">When evaluating an Arabic LLM response, which script should the output correctly use?</label>
                         <input type="text" name="llm_q86" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Modern Standard Arabic (MSA) and Egyptian colloquial Arabic are identical in vocabulary and grammar.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q87" value="true"> True</label>
                             <label><input type="radio" name="llm_q87" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">An LLM response in Arabic that uses a formal register (فصحى) when the user wrote casually (عامية) is:</label>
                         <input type="text" name="llm_q88" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Bilingual evaluators are particularly valuable for assessing LLM outputs in non-English languages.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q89" value="true"> True</label>
                             <label><input type="radio" name="llm_q89" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Which of the following would be an error in an Arabic LLM response?</label>
                         <input type="text" name="llm_q90" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">When an Arabic-language prompt is answered in English by the model without being asked to, this is a failure of:</label>
                         <input type="text" name="llm_q91" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Cultural sensitivity is an important evaluation dimension when assessing LLM responses for Arabic-speaking audiences.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q92" value="true"> True</label>
                             <label><input type="radio" name="llm_q92" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">A translation task asks the model to translate from English to Arabic. The model returns a transliteration (Arabic words written in Latin letters) instead. This is:</label>
                         <input type="text" name="llm_q93" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">What does 'code-switching' mean in a multilingual LLM context?</label>
                         <input type="text" name="llm_q94" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">An LLM trained primarily on English data may perform worse on Arabic tasks due to data imbalance.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q95" value="true"> True</label>
                             <label><input type="radio" name="llm_q95" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">When evaluating a bilingual (Arabic/English) response, the evaluator should check:</label>
                         <input type="text" name="llm_q96" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Proper names (like cities or people's names) should typically be transliterated consistently in Arabic LLM responses.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q97" value="true"> True</label>
                             <label><input type="radio" name="llm_q97" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">A user asks for advice on a culturally sensitive topic in Arabic. A high-quality response would:</label>
                         <textarea name="llm_q98" rows="2" placeholder="Your response approach..."></textarea>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Dialect differences between Gulf Arabic and Egyptian Arabic are irrelevant to output quality evaluation.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q99" value="true"> True</label>
                             <label><input type="radio" name="llm_q99" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Which of the following is a sign of poor Arabic fluency in an LLM response?</label>
                         <input type="text" name="llm_q100" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">A user asks: 'What is heavier, a kilogram of feathers or a kilogram of gold?' A correct LLM response would say:</label>
                         <input type="text" name="llm_q101" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">An LLM response that sounds confident is necessarily more accurate than one that expresses uncertainty.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q102" value="true"> True</label>
                             <label><input type="radio" name="llm_q102" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="advanced">
                         <label class="q-label">What is 'chain-of-thought' prompting?</label>
                         <input type="text" name="llm_q103" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">When a model says 'As an AI, I cannot have opinions' but then expresses a clear opinion, this is an example of:</label>
                         <input type="text" name="llm_q104" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="advanced">
                         <label class="q-label">A model that hedges excessively ('I think maybe possibly...') on simple factual questions is demonstrating good calibration.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q105" value="true"> True</label>
                             <label><input type="radio" name="llm_q105" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="advanced">
                         <label class="q-label">What is the difference between a 'factual error' and a 'reasoning error' in an LLM response?</label>
                         <textarea name="llm_q106" rows="2" placeholder="Differentiate error frameworks..."></textarea>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">A user asks a model to 'write a poem, then summarize it.' The model writes the poem but skips the summary. This is:</label>
                         <input type="text" name="llm_q107" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Models can make mathematical errors even on simple arithmetic if not prompted to show their work.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q108" value="true"> True</label>
                             <label><input type="radio" name="llm_q108" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Which of the following prompts is most likely to produce a well-structured, complete response?</label>
                         <input type="text" name="llm_q109" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">What should an evaluator do if a model response contains a URL that may be fabricated?</label>
                         <input type="text" name="llm_q110" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">An LLM response that is correct for the question asked but uses an inappropriate tone for the context should be noted in evaluation.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q111" value="true"> True</label>
                             <label><input type="radio" name="llm_q111" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">A model is asked 'Who won the 2022 FIFA World Cup?' and answers 'Brazil.' This is:</label>
                         <input type="text" name="llm_q112" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">What is 'output formatting' as an evaluation criterion?</label>
                         <input type="text" name="llm_q113" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">When a prompt has multiple sub-questions, a high-quality response should address all of them.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q114" value="true"> True</label>
                             <label><input type="radio" name="llm_q114" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">A model is asked to write code in Python but returns JavaScript. This is a failure of:</label>
                         <input type="text" name="llm_q115" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Which of the following best describes 'model uncertainty'?</label>
                         <input type="text" name="llm_q116" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Evaluators should penalize a model for appropriately saying 'I don't know' when it genuinely doesn't have enough information.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q117" value="true"> True</label>
                             <label><input type="radio" name="llm_q117" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">A prompt asks for a 'professional email tone.' The model responds with slang and emojis. This is a failure of:</label>
                         <input type="text" name="llm_q118" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">What is the way to handle a question where you, as an evaluator, are not sure about the correct answer?</label>
                         <input type="text" name="llm_q119" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Consistency in evaluation means applying the same criteria to all responses, regardless of topic, length, or language.</label>
                         <div class="radio-opts">
                             <label><input type="radio" name="llm_q120" value="true"> True</label>
                             <label><input type="radio" name="llm_q120" value="false"> False</label>
                         </div>
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">Which of the following is the MOST important quality for an LLM data annotator?</label>
                         <input type="text" name="llm_q121" placeholder="Your answer...">
                     </li>
-                    <li>
+                    <li data-level="beginner">
                         <label class="q-label">As a final question: If you had to choose ONE word to describe what makes a great LLM response, which would it be?</label>
                         <input type="text" name="llm_q122" placeholder="Your answer...">
                     </li>
