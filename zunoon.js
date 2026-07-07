@@ -48,6 +48,72 @@
   }
   initHamburger();
 
+  // ── Candidate Journey Tracker ───────────────────────────────
+  // NOTE: This is a client-side (localStorage) convenience tracker only.
+  // It helps candidates see where they are in the process and softly
+  // encourages completing steps in order — it is NOT secure access
+  // control (there is no backend), matching the same approach already
+  // used for the registration invite gate.
+  const JOURNEY_KEY = 'ada_journey_progress';
+
+  const JOURNEY_STEPS = [
+    { key: 'register',    label: 'Registration',   pages: ['register.html'] },
+    { key: 'screening',   label: 'Screening',      pages: ['screening.html'] },
+    { key: 'english',     label: 'English Test',   pages: ['english-test.html'] },
+    { key: 'llm',         label: 'LLM Assessment', pages: ['llm.html', 'bilingual-llm.html'] },
+    { key: 'training',    label: 'Live Training',  pages: ['training.html'] },
+    { key: 'certificate', label: 'Certificate',    pages: ['certificate.html'] },
+  ];
+
+  function getJourney() {
+    try { return JSON.parse(localStorage.getItem(JOURNEY_KEY) || '{}'); }
+    catch (e) { return {}; }
+  }
+
+  function markStepComplete(key, extra) {
+    try {
+      const data = getJourney();
+      data[key] = Object.assign({}, (typeof data[key] === 'object' ? data[key] : {}), { done: true }, extra || {});
+      localStorage.setItem(JOURNEY_KEY, JSON.stringify(data));
+    } catch (e) {}
+    renderJourneyTracker();
+  }
+
+  function isStepDone(key) {
+    const data = getJourney();
+    return !!(data[key] && data[key].done);
+  }
+
+  function currentPageFile() {
+    return (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+  }
+
+  function renderJourneyTracker() {
+    const mount = $('#journey-tracker');
+    if (!mount) return;
+    const page = currentPageFile();
+
+    const html = JOURNEY_STEPS.map((step, i) => {
+      const done = isStepDone(step.key);
+      const isCurrent = step.pages.includes(page);
+      const cls = ['journey-step'];
+      if (done) cls.push('done');
+      if (isCurrent) cls.push('current');
+      const icon = done ? '<i class="fa-solid fa-check"></i>' : (i + 1);
+      const connector = i < JOURNEY_STEPS.length - 1 ? '<div class="journey-connector"></div>' : '';
+      return `
+        <div class="${cls.join(' ')}">
+          <span class="step-dot">${icon}</span>
+          <span class="step-label">${step.label}</span>
+        </div>
+        ${connector}
+      `;
+    }).join('');
+
+    mount.innerHTML = `<div class="journey-track">${html}</div>`;
+  }
+  renderJourneyTracker();
+
   // ── Contact form (index.html) ──────────────────────────────
   const contactForm = $('#contact-form');
   if (contactForm) {
@@ -63,6 +129,80 @@
       const body    = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${message}`);
       window.location.href = `mailto:batoul.hassaballa@gmail.com?subject=${subject}&body=${body}`;
     });
+  }
+
+  // ── Registration Invitation Gate ────────────────────────────
+  // NOTE: This is a client-side convenience gate only — it keeps casual
+  // visitors from stumbling into the application form, but it is NOT secure
+  // (anyone can read this file). Do not treat it as real access control.
+  // To add/remove codes, edit VALID_INVITE_CODES below. Codes are matched
+  // case-insensitively and trimmed.
+  const VALID_INVITE_CODES = [
+    'ADA-2026',
+    'ADA-COHORT1',
+    'ZUNOON-VIP',
+  ];
+
+  const inviteInput  = $('#invite-code-input');
+  const inviteBtn    = $('#invite-submit-btn');
+  const inviteStatus = $('#invite-status');
+  const inviteGate   = $('#invite-gate');
+  const regActionBox = $('#registration-action-box');
+
+  if (inviteBtn && inviteInput && regActionBox) {
+    const UNLOCK_KEY = 'ada_invite_verified';
+
+    function unlockRegistration(silent) {
+      regActionBox.classList.remove('locked');
+      inviteStatus.textContent = 'Code accepted — you can now fill out the application form below.';
+      inviteStatus.className = 'status-ok';
+      inviteInput.disabled = true;
+      inviteBtn.disabled = true;
+      const postNote = $('#post-register-note');
+      if (postNote) postNote.style.display = 'block';
+    }
+
+    // Restore prior verification for this browser (convenience only)
+    try {
+      if (localStorage.getItem(UNLOCK_KEY) === '1') unlockRegistration(true);
+    } catch (e) {}
+
+    function tryUnlock() {
+      const entered = inviteInput.value.trim().toUpperCase();
+      const isValid = VALID_INVITE_CODES.some(c => c.toUpperCase() === entered);
+
+      if (!entered) {
+        inviteStatus.textContent = 'Please enter your invitation code.';
+        inviteStatus.className = 'status-error';
+        return;
+      }
+
+      if (isValid) {
+        try { localStorage.setItem(UNLOCK_KEY, '1'); } catch (e) {}
+        unlockRegistration(false);
+      } else {
+        inviteInput.classList.add('input-error');
+        setTimeout(() => inviteInput.classList.remove('input-error'), 400);
+        inviteStatus.textContent = 'That code isn\'t recognized. Double-check the email from ADA, or contact us if you believe this is an error.';
+        inviteStatus.className = 'status-error';
+      }
+    }
+
+    inviteBtn.addEventListener('click', tryUnlock);
+    inviteInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); tryUnlock(); }
+    });
+
+    const confirmRegBtn = $('#confirm-registration-btn');
+    if (confirmRegBtn) {
+      confirmRegBtn.addEventListener('click', () => {
+        markStepComplete('register');
+        $('#post-register-note').style.display = 'none';
+        const banner = $('#register-confirmation-banner');
+        banner.style.display = 'flex';
+        banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    }
   }
 
   // ── English Placement Test ─────────────────────────────────
@@ -120,13 +260,13 @@
       q11: 'B', q12: 'B', q13: 'A', q14: 'C', q15: 'B',
       q16: 'B', q17: 'A', q18: 'B', q19: 'B', q20: 'B',
       q21: 'B', q22: 'C', q23: 'B', q24: 'B', q25: 'B',
-      q26: 'D', q27: 'B', q28: 'C', q29: 'A', q30: 'B',
+      q26: 'B', q27: 'B', q28: 'C', q29: 'A', q30: 'B',
       q31: 'B', q32: 'A', q33: 'C', q34: 'B', q35: 'B',
       q36: 'B', q37: 'C', q38: 'B', q39: 'B', q40: 'A',
       q41: 'A', q42: 'A', q43: 'C', q44: 'C', q45: 'A',
       q46: 'A', q47: 'A', q48: 'A', q49: 'A', q50: 'B',
-      q51: 'B', q52: 'B', q53: 'B', q54: 'C', q55: 'B',
-      q56: 'A', q57: 'B', q58: 'C', q59: 'B', q60: 'C',
+      q51: 'C', q52: 'A', q53: 'B', q54: 'C', q55: 'B',
+      q56: 'C', q57: 'B', q58: 'C', q59: 'B', q60: 'C',
       // Comprehension MC
       comp_mc1: 'C', comp_mc2: 'B', comp_mc3: 'C',
       // True/False
@@ -173,12 +313,18 @@
       const pct   = Math.round((correct / total) * 100);
       const cefr  = getCEFR(correct, total);
 
+      markStepComplete('english', { score: pct });
+
       // Show modal
       showScoreModal({
         title: timedOut ? "⏱ Time's Up!" : '✓ Test Submitted',
         score: pct,
         subtitle: cefr.level,
         desc: `You answered ${correct} of ${total} questions correctly. ${cefr.desc}`,
+        continueLinks: [
+          { href: 'llm.html', label: 'Continue → LLM Assessment (English)' },
+          { href: 'bilingual-llm.html', label: 'Continue → LLM Assessment (Bilingual AR/EN)' },
+        ],
       });
     }
 
@@ -196,11 +342,16 @@
 
   function initLLMAssessment() {
     const STORAGE_KEY = 'ada_llm_progress_' + (llmForm.id || 'default');
-    const allFieldNames = new Set();
-    $$('input, textarea, select', llmForm).forEach(inp => {
-      if (inp.type !== 'submit' && inp.name) allFieldNames.add(inp.name);
-    });
-    const TOTAL = allFieldNames.size;
+
+    function visibleFieldNames() {
+      const names = new Set();
+      $$('li:not(.level-hidden) input, li:not(.level-hidden) textarea, li:not(.level-hidden) select', llmForm).forEach(inp => {
+        if (inp.type !== 'submit' && inp.name) names.add(inp.name);
+      });
+      return names;
+    }
+
+    let TOTAL = visibleFieldNames().size;
 
     // Inject sticky progress bar above the hub
     const hub = $('#llm-assessment-hub');
@@ -217,12 +368,31 @@
     const fillEl  = $('#llm-bar-fill');
     const labelEl = $('#llm-progress-label');
 
+    // ── Difficulty-level toggle (llm.html only — no-op elsewhere) ──
+    const levelToggle = $('#llm-level-toggle');
+    if (levelToggle) {
+      $$('button', levelToggle).forEach(btn => {
+        btn.addEventListener('click', () => {
+          const filter = btn.dataset.levelFilter;
+          $$('button', levelToggle).forEach(b => b.classList.toggle('active', b === btn));
+          $$('li[data-level]', llmForm).forEach(li => {
+            const show = filter === 'all' || li.dataset.level === filter;
+            li.classList.toggle('level-hidden', !show);
+          });
+          TOTAL = visibleFieldNames().size;
+          updateLLMProgress();
+        });
+      });
+    }
+
     function updateLLMProgress() {
-      const inputs  = $$('input, textarea, select', llmForm);
+      const visible = visibleFieldNames();
+      const inputs  = $$('li:not(.level-hidden) input, li:not(.level-hidden) textarea, li:not(.level-hidden) select', llmForm);
       let answered  = 0;
       const counted = new Set();
 
       inputs.forEach(inp => {
+        if (!visible.has(inp.name)) return;
         if (inp.type === 'radio') {
           const group = inp.name;
           if (!counted.has(group) && $(`input[name="${group}"]:checked`, llmForm)) {
@@ -237,7 +407,7 @@
         }
       });
 
-      const pct = Math.min((answered / TOTAL) * 100, 100);
+      const pct = TOTAL ? Math.min((answered / TOTAL) * 100, 100) : 0;
       fillEl.style.width = pct + '%';
       labelEl.textContent = `${answered} / ${TOTAL} answered`;
 
@@ -272,13 +442,14 @@
     llmForm.addEventListener('submit', (e) => {
       e.preventDefault();
 
-      // Count completed
+      // Count completed (only among currently visible/selected-track questions)
+      const visible = visibleFieldNames();
       const data    = new FormData(llmForm);
       const counted = new Set();
       let completed = 0;
 
-      for (let [k] of data.entries()) {
-        if (!counted.has(k) && data.get(k).trim()) {
+      for (let [k, v] of data.entries()) {
+        if (visible.has(k) && !counted.has(k) && v.trim()) {
           counted.add(k);
           completed++;
         }
@@ -286,20 +457,27 @@
 
       try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
 
+      markStepComplete('llm', { track: llmForm.id });
+
       showScoreModal({
         title: '✓ Assessment Submitted',
-        score: Math.round((completed / TOTAL) * 100),
+        score: TOTAL ? Math.round((completed / TOTAL) * 100) : 0,
         subtitle: `${completed} of ${TOTAL} questions completed`,
         desc: 'Your LLM evaluation responses have been recorded. ADA will review your submission and contact you with next steps.',
         noReview: true,
+        continueLinks: [{ href: 'training.html', label: 'Continue → Live Annotation Training' }],
       });
     });
   }
 
   // ── Score Modal (shared) ────────────────────────────────────
-  function showScoreModal({ title, score, subtitle, desc, noReview }) {
+  function showScoreModal({ title, score, subtitle, desc, noReview, continueLinks }) {
     const existing = $('#score-modal');
     if (existing) existing.remove();
+
+    const continueHTML = (continueLinks || []).map(l =>
+      `<a href="${l.href}" class="btn btn-primary" style="margin-top:10px;width:100%;justify-content:center;">${l.label}</a>`
+    ).join('');
 
     const modal = document.createElement('div');
     modal.id = 'score-modal';
@@ -311,6 +489,7 @@
         <div class="score-level">${subtitle}</div>
         <p class="score-desc">${desc}</p>
         ${!noReview ? `<button class="btn btn-primary" id="review-btn">Review Answers</button>` : ''}
+        ${continueHTML}
         <button class="btn btn-submit" id="close-modal-btn" style="margin-top:12px;">Close</button>
       </div>
     `;
@@ -379,6 +558,13 @@
           a.download = 'ADA-screening-recording.webm';
           a.click();
           URL.revokeObjectURL(url);
+
+          markStepComplete('screening');
+          const banner = $('#screening-confirmation-banner');
+          if (banner) {
+            banner.style.display = 'flex';
+            banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
         };
         recorder.start();
         isRecording = true;
@@ -396,442 +582,471 @@
     });
   }
 
-  // ── Training / Annotation Sandbox ──────────────────────────
+  // ── Training / Live Annotation Sandbox (multi-modality) ─────
   const trainingWorkspace = $('#training-workspace');
   if (trainingWorkspace) {
     initAnnotationSandbox();
   }
 
-  function initAnnotationSandbox() {
-    // Real annotation samples from ADA dataset.
-    // NOTE: embedded here for now. To swap in the live GitHub dataset
-    // (dataset/textDataset), replace this array with a fetch() against
-    // the raw.githubusercontent.com JSON file — sample shape (id/type/
-    // language/text/task) is designed to match the repo dataset format.
-    const SAMPLES = [
-      {
-        id: 1,
-        type: 'Customer Review',
-        language: 'English',
-        text: 'The product arrived two days late and the packaging was damaged, but the item itself was in perfect condition. Customer service was helpful when I called to complain. Overall a 3-star experience.',
-        task: 'Rate this customer review on the following quality dimensions for LLM training data.',
-        gold: { Relevance: 5, Fluency: 5, Accuracy: 4, Completeness: 4 },
-        tip: 'Mixed-sentiment reviews (late delivery + good product) should still score high on Relevance/Accuracy — annotators often under-rate these by mistake.',
-      },
-      {
-        id: 2,
-        type: 'Social Media Comment',
-        language: 'English',
-        text: 'Can\'t believe how good this coffee is!! I\'ve tried SO many brands and nothing compares 😍 literally my morning is ruined without it lol. 10/10 would recommend to literally everyone.',
-        task: 'Evaluate this social media comment for sentiment accuracy and annotation quality.',
-        gold: { Relevance: 5, Fluency: 3, Accuracy: 5, Completeness: 3 },
-        tip: 'Informal tone, emoji, and exaggeration ("ruined without it") lower Fluency/Completeness scores even when sentiment is clearly positive — don\'t conflate enthusiasm with quality.',
-      },
-      {
-        id: 3,
-        type: 'Product Description',
-        language: 'English',
-        text: 'Premium stainless steel water bottle with double-wall vacuum insulation. Keeps beverages cold for 24 hours or hot for 12 hours. BPA-free, leak-proof lid. Available in 5 colors. Capacity: 750ml.',
-        task: 'Assess this product description for factual clarity, completeness, and annotation value.',
-        gold: { Relevance: 5, Fluency: 5, Accuracy: 5, Completeness: 5 },
-        tip: 'Clean, specific, verifiable specs (capacity, duration, materials) with no ambiguity — this is a near-ideal reference example for "Completeness."',
-      },
-      {
-        id: 4,
-        type: 'Support Ticket',
-        language: 'English',
-        text: 'Hi I need help. My account has been locked for 3 days and nobody is responding to my emails. I have an urgent deadline and I can\'t access my files. Please this is very important.',
-        task: 'Rate this support ticket for urgency detection and tone annotation quality.',
-        gold: { Relevance: 5, Fluency: 4, Accuracy: 4, Completeness: 3 },
-        tip: 'Urgency markers ("3 days", "urgent deadline") are explicit and should be flagged. Completeness is capped because the ticket lacks an account ID or order number.',
-      },
-      {
-        id: 5,
-        type: 'Bilingual Text',
-        language: 'Arabic–English',
-        text: 'هذا المنتج ممتاز! The quality exceeded my expectations. سأشتري مرة أخرى بالتأكيد. Highly recommended for anyone looking for a reliable option.',
-        task: 'Evaluate this bilingual Arabic-English text for code-switching accuracy and annotation completeness.',
-        gold: { Relevance: 5, Fluency: 4, Accuracy: 5, Completeness: 4 },
-        tip: 'Natural code-switching (not translation-pair text) — both languages carry independent meaning. Fluency is scored per-language, not penalized for switching itself.',
-      },
-      {
-        id: 6,
-        type: 'LLM Response Evaluation',
-        language: 'English',
-        text: 'User asked: "What is photosynthesis?" \n\nModel responded: "Photosynthesis is the process by which plants, algae, and some bacteria convert light energy—usually from the sun—into chemical energy stored as glucose. This process uses carbon dioxide and water, and releases oxygen as a byproduct."',
-        task: 'Rate this LLM response for relevance, accuracy, fluency, and completeness.',
-        gold: { Relevance: 5, Fluency: 5, Accuracy: 5, Completeness: 4 },
-        tip: 'Factually correct and well-written. Completeness held at 4 — a strong answer could also mention chlorophyll/light-dependent vs. light-independent reactions.',
-      },
-      {
-        id: 7,
-        type: 'LLM Response Evaluation',
-        language: 'English',
-        text: 'User asked: "Write me a professional email declining a meeting." \n\nModel responded: "hey cant make it to the meeting tomorrow something came up. maybe next time? thanks"',
-        task: 'Evaluate this LLM response. Does it follow the instruction? Rate each quality dimension.',
-        gold: { Relevance: 3, Fluency: 2, Accuracy: 3, Completeness: 2 },
-        tip: 'Instruction said "professional" — the response is casual, lowercase, no subject/greeting/sign-off. This is a clear instruction-following failure, not a borderline case.',
-      },
-      {
-        id: 8,
-        type: 'Customer Review',
-        language: 'Arabic',
-        text: 'المنتج وصل في الوقت المحدد والتغليف كان ممتازاً. الجودة أفضل بكثير مما توقعت بالنظر للسعر. سأوصي به لجميع أصدقائي. شكراً للبائع على الخدمة الرائعة.',
-        task: 'Rate this Arabic customer review for sentiment clarity and annotation quality.',
-        gold: { Relevance: 5, Fluency: 5, Accuracy: 5, Completeness: 4 },
-        tip: 'Clear positive sentiment with specific reasons (timing, packaging, value-for-price). Grammatically clean Arabic — strong reference example.',
-      },
-    ];
+  const GH_RAW_BASE = 'https://raw.githubusercontent.com/AccurateDataAnnotator/accurate-data-annotator/main/';
 
-    const DIMENSIONS  = ['Relevance', 'Fluency', 'Accuracy', 'Completeness'];
-    const CONFIDENCE_LEVELS = ['Very confident', 'Somewhat confident', 'Unsure'];
-    const SAVE_KEY     = 'ada_training_progress_v1';
-    let currentIndex = 0;
-    const ratings    = {}; // { sampleId: { dims, flagged, notes, confidence, submitted } }
+  function ghUrl(path) {
+    return GH_RAW_BASE + path.split('/').map(encodeURIComponent).join('/');
+  }
 
-    // Restore any saved session
-    try {
-      const saved = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
-      if (saved && typeof saved === 'object') {
-        if (saved.ratings) Object.assign(ratings, saved.ratings);
-        if (Number.isInteger(saved.currentIndex) && saved.currentIndex >= 0 && saved.currentIndex < SAMPLES.length) {
-          currentIndex = saved.currentIndex;
+  function escapeHtml(str) {
+    return String(str == null ? '' : str).replace(/[&<>"']/g, c => (
+      { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+    ));
+  }
+
+  // Minimal RFC4180-ish CSV parser (handles quoted fields with commas/newlines)
+  function parseCSV(text) {
+    const rows = [];
+    let field = '', row = [], inQuotes = false, i = 0;
+    const pushField = () => { row.push(field); field = ''; };
+    const pushRow = () => { rows.push(row); row = []; };
+    while (i < text.length) {
+      const c = text[i];
+      if (inQuotes) {
+        if (c === '"') {
+          if (text[i + 1] === '"') { field += '"'; i += 2; continue; }
+          inQuotes = false; i++; continue;
         }
+        field += c; i++; continue;
+      } else {
+        if (c === '"') { inQuotes = true; i++; continue; }
+        if (c === ',') { pushField(); i++; continue; }
+        if (c === '\r') { i++; continue; }
+        if (c === '\n') { pushField(); pushRow(); i++; continue; }
+        field += c; i++; continue;
       }
-    } catch (e) {}
+    }
+    if (field.length || row.length) { pushField(); pushRow(); }
+    const header = (rows.shift() || []).map(h => h.trim());
+    return rows
+      .filter(r => r.length === header.length && r.some(v => v !== ''))
+      .map(r => {
+        const obj = {};
+        header.forEach((h, idx) => { obj[h] = (r[idx] || '').trim(); });
+        return obj;
+      });
+  }
 
-    function persistProgress() {
-      try {
-        localStorage.setItem(SAVE_KEY, JSON.stringify({ currentIndex, ratings }));
-      } catch (e) {}
+  function initAnnotationSandbox() {
+    const root       = $('#training-modality-root');
+    const sourceNote = $('#dataset-source-note');
+    const tabs       = $$('.modality-tab');
+
+    const IMAGE_CATEGORIES = ['Healthcare/Medical', 'Education/Classroom', 'Domestic/Daily Life', 'Traffic/Urban Scene', 'Leisure/Outdoor', 'Commercial/Workplace'];
+    const AUDIO_CATEGORIES = ['Human Voice', 'Nature/Environmental', 'Urban/Transport', 'Ambient/Crowd Noise'];
+    const VIDEO_CATEGORIES = ['Traffic/Urban Scene', 'Sports/Recreation', 'Education/People Activity', 'Workplace/Professional', 'Transport/Vehicle'];
+
+    const IMAGE_MANIFEST = [
+      { file: 'Image-1.jpg',  title: 'Patient Lying in Hospital Bed with Nurse Checking Vitals', category: 'Healthcare/Medical' },
+      { file: 'Image-2.jpg',  title: 'Doctor Examining a Child in a Hospital Room', category: 'Healthcare/Medical' },
+      { file: 'Image-3.jpg',  title: 'Teacher Standing in Front of a Classroom Teaching Students', category: 'Education/Classroom' },
+      { file: 'Image-4.jpg',  title: 'Student Reading a Book at a Desk in a School Library', category: 'Education/Classroom' },
+      { file: 'Image-5.jpg',  title: 'Family Eating Dinner Together at Home in the Dining Room', category: 'Domestic/Daily Life' },
+      { file: 'Image-6.jpg',  title: 'Person Drinking Coffee at a Kitchen Table in the Morning', category: 'Domestic/Daily Life' },
+      { file: 'Image-7.jpg',  title: 'Woman Relaxing on a Sofa Watching TV at Home', category: 'Domestic/Daily Life' },
+      { file: 'Image-8.jpg', title: 'Busy City Street Intersection with Moving Cars and Traffic Lights', category: 'Traffic/Urban Scene' },
+      { file: 'Image-9.jpg',  title: 'Pedestrian Crossing a Busy Road at a Crosswalk', category: 'Traffic/Urban Scene' },
+      { file: 'Image-10.jpg', title: 'Man Waiting at a Bus Stop in an Urban Area', category: 'Traffic/Urban Scene' },
+      { file: 'Image-11.jpg', title: 'Elderly Person Walking with a Cane in a Park', category: 'Leisure/Outdoor' },
+      { file: 'Image-12.jpg', title: 'Young Woman Using a Laptop While Sitting on Her Bed', category: 'Domestic/Daily Life' },
+      { file: 'Image-13.jpg', title: 'Children Playing Soccer in a School Playground', category: 'Leisure/Outdoor' },
+      { file: 'Image-14.jpg', title: 'Chef Cooking in a Restaurant Kitchen', category: 'Commercial/Workplace' },
+      { file: 'Image-15.jpg', title: 'Shopper Carrying Bags Inside a Busy Shopping Mall', category: 'Commercial/Workplace' },
+    ].map((s, i) => ({ id: 'img_' + (i + 1), url: ghUrl('dataset/imagesDataset/' + s.file), title: s.title, category: s.category }));
+
+    const AUDIO_MANIFEST = [
+      { file: 'A man voice.mp3', category: 'Human Voice' },
+      { file: 'A woman Voice.mp3', category: 'Human Voice' },
+      { file: 'baby-crying.mp3', category: 'Human Voice' },
+      { file: 'Restaurant-talking-people-ambience.mp3', category: 'Ambient/Crowd Noise' },
+      { file: 'City-Traffic-Sound.mp3', category: 'Urban/Transport' },
+      { file: 'airplane-flying.mp3', category: 'Urban/Transport' },
+      { file: 'birds sound.mp3', category: 'Nature/Environmental' },
+      { file: 'rain-sound.mp3', category: 'Nature/Environmental' },
+      { file: 'wind-blowing.mp3', category: 'Nature/Environmental' },
+    ].map((s, i) => ({ id: 'aud_' + (i + 1), url: ghUrl('dataset/audioDataset/' + s.file), title: s.file.replace(/\.mp3$/i, '').trim(), category: s.category }));
+
+    const VIDEO_MANIFEST = [
+      { file: '3Airplane taking off .mp4', category: 'Transport/Vehicle' },
+      { file: 'A group of students running to school entrance..mp4', category: 'Education/People Activity' },
+      { file: 'Football Match.mp4', category: 'Sports/Recreation' },
+      { file: 'Pedestrians-across-street .mp4', category: 'Traffic/Urban Scene' },
+      { file: 'Person giving a presentation –.mp4', category: 'Workplace/Professional' },
+      { file: 'cars stuck in heavy traffic .mp4', category: 'Traffic/Urban Scene' },
+    ].map((s, i) => ({ id: 'vid_' + (i + 1), url: ghUrl('dataset/videoDataset/' + s.file), title: s.file.replace(/\.mp4$/i, '').trim(), category: s.category }));
+
+    let TEXT_INTENTS = []; // populated once CSV loads
+
+    const MODALITIES = {
+      text: {
+        label: 'Text Annotation',
+        note: 'Live from dataset/textDataset/ADA_Text_Data_Cleaned.csv on GitHub.',
+        load: async () => {
+          const res = await fetch(ghUrl('dataset/textDataset/ADA_Text_Data_Cleaned.csv'));
+          if (!res.ok) throw new Error('Could not fetch text dataset (' + res.status + ')');
+          const rows = parseCSV(await res.text());
+          TEXT_INTENTS = [...new Set(rows.map(r => r.Primary_Intent).filter(Boolean))].sort();
+          return rows.slice(0, 15).map(r => ({ id: r.Record_ID, ...r }));
+        },
+        renderTask: (s) => `
+          <div class="task-label">${escapeHtml(s.Text_Type)}</div>
+          <div class="task-text">${escapeHtml(s.Source_Text)}</div>
+          <div class="task-meta">
+            <span class="task-tag">${escapeHtml(s.Text_Type)}</span>
+            <span class="task-tag">Record ${escapeHtml(s.Record_ID)}</span>
+          </div>
+          <p style="margin-top:16px;font-size:14px;color:var(--gray-60)">Read the text, classify its sentiment and primary intent, then note any named entities you spot.</p>
+        `,
+        renderAnswerForm: () => `
+          <div class="answer-field">
+            <label for="ans-sentiment">Sentiment</label>
+            <select id="ans-sentiment">
+              <option value="">Select sentiment…</option>
+              <option>Positive</option><option>Negative</option><option>Neutral</option><option>Mixed</option>
+            </select>
+          </div>
+          <div class="answer-field">
+            <label for="ans-intent">Primary Intent</label>
+            <select id="ans-intent">
+              <option value="">Select intent…</option>
+              ${TEXT_INTENTS.map(v => `<option>${escapeHtml(v)}</option>`).join('')}
+            </select>
+          </div>
+          <div class="answer-field">
+            <label for="ans-entities">Named Entities (comma-separated, e.g. "wireless headphones [PROD]")</label>
+            <input type="text" id="ans-entities" placeholder="Type any entities you notice…">
+          </div>
+        `,
+        checkAnswer: (s) => {
+          const mySent = $('#ans-sentiment').value;
+          const myIntent = $('#ans-intent').value;
+          const myEntities = $('#ans-entities').value.trim();
+          const rows = [
+            { label: 'Sentiment', mine: mySent || '—', gold: s.Sentiment_Label, correct: mySent === s.Sentiment_Label },
+            { label: 'Primary Intent', mine: myIntent || '—', gold: s.Primary_Intent, correct: myIntent === s.Primary_Intent },
+            { label: 'Named Entities', mine: myEntities || '—', gold: s.NER_Entities || '—', correct: null },
+          ];
+          return rows;
+        },
+      },
+
+      image: {
+        label: 'Image Annotation',
+        note: 'Live image files from dataset/imagesDataset/ on GitHub.',
+        load: async () => IMAGE_MANIFEST,
+        renderTask: (s) => `
+          <div class="media-preview"><img src="${s.url}" alt="${escapeHtml(s.title)}" loading="lazy"></div>
+          <div class="task-label">${escapeHtml(s.title)}</div>
+          <div class="task-meta"><span class="task-tag">${s.id}</span></div>
+        `,
+        renderAnswerForm: () => `
+          <div class="answer-field">
+            <label for="ans-category">Scene Category</label>
+            <select id="ans-category">
+              <option value="">Select category…</option>
+              ${IMAGE_CATEGORIES.map(v => `<option>${v}</option>`).join('')}
+            </select>
+          </div>
+        `,
+        checkAnswer: (s) => {
+          const mine = $('#ans-category').value;
+          return [{ label: 'Category', mine: mine || '—', gold: s.category, correct: mine === s.category }];
+        },
+      },
+
+      audio: {
+        label: 'Audio Annotation',
+        note: 'Live audio files from dataset/audioDataset/ on GitHub.',
+        load: async () => AUDIO_MANIFEST,
+        renderTask: (s) => `
+          <div class="media-preview"><audio controls preload="none" src="${s.url}"></audio></div>
+          <div class="task-label">${escapeHtml(s.title)}</div>
+          <div class="task-meta"><span class="task-tag">${s.id}</span></div>
+          <p style="margin-top:16px;font-size:14px;color:var(--gray-60)">Listen to the clip and classify the sound category.</p>
+        `,
+        renderAnswerForm: () => `
+          <div class="answer-field">
+            <label for="ans-category">Sound Category</label>
+            <select id="ans-category">
+              <option value="">Select category…</option>
+              ${AUDIO_CATEGORIES.map(v => `<option>${v}</option>`).join('')}
+            </select>
+          </div>
+        `,
+        checkAnswer: (s) => {
+          const mine = $('#ans-category').value;
+          return [{ label: 'Category', mine: mine || '—', gold: s.category, correct: mine === s.category }];
+        },
+      },
+
+      video: {
+        label: 'Video Annotation',
+        note: 'Live video files from dataset/videoDataset/ on GitHub.',
+        load: async () => VIDEO_MANIFEST,
+        renderTask: (s) => `
+          <div class="media-preview"><video controls preload="none" src="${s.url}"></video></div>
+          <div class="task-label">${escapeHtml(s.title)}</div>
+          <div class="task-meta"><span class="task-tag">${s.id}</span></div>
+          <p style="margin-top:16px;font-size:14px;color:var(--gray-60)">Watch the clip and tag the primary activity or scene.</p>
+        `,
+        renderAnswerForm: () => `
+          <div class="answer-field">
+            <label for="ans-category">Activity / Scene Tag</label>
+            <select id="ans-category">
+              <option value="">Select tag…</option>
+              ${VIDEO_CATEGORIES.map(v => `<option>${v}</option>`).join('')}
+            </select>
+          </div>
+        `,
+        checkAnswer: (s) => {
+          const mine = $('#ans-category').value;
+          return [{ label: 'Activity/Scene', mine: mine || '—', gold: s.category, correct: mine === s.category }];
+        },
+      },
+    };
+
+    const state = {}; // per-modality: { samples, index, loaded, loading, error, submitted: Set }
+    Object.keys(MODALITIES).forEach(k => { state[k] = { samples: [], index: 0, loaded: false, loading: false, error: null, submitted: new Set() }; });
+
+    let currentModality = 'text';
+
+    function setActiveTab(name) {
+      tabs.forEach(t => t.classList.toggle('active', t.dataset.modality === name));
     }
 
-    // Replace placeholder with sandbox
-    const placeholder = $('.live-stream-placeholder');
-    if (placeholder) placeholder.style.display = 'none';
+    async function switchModality(name) {
+      currentModality = name;
+      setActiveTab(name);
 
-    const sandboxHTML = `
-      <div id="training-progress-bar">
-        <div id="training-progress-inner">
-          <span id="training-progress-label">0 / ${SAMPLES.length} completed</span>
-          <div id="training-bar-track"><div id="training-bar-fill"></div></div>
-        </div>
-      </div>
-      <div id="annotation-sandbox" class="active">
-        <div class="sandbox-header">
-          <span>Live Annotation Sandbox · Zunoon</span>
-          <span class="sandbox-badge">TRAINING MODE</span>
-        </div>
-        <div class="sandbox-body">
-          <div class="task-panel">
-            <div class="task-label" id="sample-type">—</div>
-            <div class="task-text" id="sample-text">Loading...</div>
-            <div class="task-meta" id="sample-meta"></div>
-            <p style="margin-top:16px;font-size:14px;color:var(--gray-60)" id="task-instruction"></p>
+      if (name === 'multimodal') {
+        sourceNote.textContent = 'Multimodal dataset folder exists in the repo but has no live samples yet — roadmap item.';
+        root.innerHTML = `
+          <div class="multimodal-soon">
+            <i class="fa-solid fa-layer-group"></i>
+            <h3>Multimodal Annotation — Coming Soon</h3>
+            <p>The <code>dataset/multimodalDataset</code> folder is reserved in the GitHub repo for combined text+image / text+audio annotation tasks. It's currently empty, so this module isn't live yet. In the meantime, practice each modality separately using the tabs above.</p>
+          </div>`;
+        return;
+      }
+
+      const mod = MODALITIES[name];
+      const st  = state[name];
+      sourceNote.textContent = mod.note;
+
+      if (!st.loaded && !st.loading) {
+        st.loading = true;
+        root.innerHTML = `<div class="modality-loading"><i class="fa-solid fa-spinner fa-spin"></i>Loading live ${mod.label.toLowerCase()} samples from GitHub…</div>`;
+        try {
+          st.samples = await mod.load();
+          st.loaded  = true;
+        } catch (err) {
+          st.error = err.message || 'Failed to load dataset.';
+          st.loading = false;
+          root.innerHTML = `<div class="modality-error"><i class="fa-solid fa-triangle-exclamation"></i> ${escapeHtml(st.error)}<br><button class="btn btn-outline-dark" id="retry-load-btn" style="margin-top:14px;">Retry</button></div>`;
+          const retryBtn = $('#retry-load-btn');
+          if (retryBtn) retryBtn.addEventListener('click', () => { st.error = null; switchModality(name); });
+          return;
+        }
+        st.loading = false;
+      }
+
+      renderSample(name);
+    }
+
+    function renderSample(name) {
+      const mod = MODALITIES[name];
+      const st  = state[name];
+      const s   = st.samples[st.index];
+      if (!s) {
+        root.innerHTML = `<div class="modality-error">No samples available for this modality yet.</div>`;
+        return;
+      }
+
+      const completed = st.submitted.size;
+      const total = st.samples.length;
+      const pct = Math.round((completed / total) * 100);
+
+      root.innerHTML = `
+        <div id="training-progress-bar">
+          <div id="training-progress-inner">
+            <span id="training-progress-label">${completed} / ${total} completed</span>
+            <div id="training-bar-track"><div id="training-bar-fill" style="width:${pct}%"></div></div>
           </div>
-          <div class="rating-panel">
-            <h4>Rate This Sample</h4>
-            <div id="rating-rows"></div>
-            <div class="confidence-row">
-              <span class="confidence-label">How confident are you?</span>
-              <div class="confidence-opts" id="confidence-opts"></div>
+        </div>
+        <div id="annotation-sandbox" class="active">
+          <div class="sandbox-header">
+            <span>Live Annotation Sandbox · Zunoon — ${mod.label}</span>
+            <span class="sandbox-badge">LIVE DATASET</span>
+          </div>
+          <div class="sandbox-body">
+            <div class="task-panel">${mod.renderTask(s)}</div>
+            <div class="answer-panel">
+              <h4>Your Annotation</h4>
+              ${mod.renderAnswerForm(s)}
+              <div class="check-answer-row">
+                <button class="btn btn-outline-dark" id="check-answer-btn">Check Against Reference Label</button>
+              </div>
+              <div class="gold-compare" id="gold-compare-content" style="display:none;"></div>
+            </div>
+            <div class="sandbox-nav">
+              <button class="sandbox-btn prev" id="prev-sample" ${st.index === 0 ? 'disabled' : ''}>← Previous</button>
+              <span class="sandbox-counter">${st.index + 1} / ${total}</span>
+              <button class="sandbox-btn ${st.index === total - 1 ? 'finish' : 'next'}" id="next-sample">${st.index === total - 1 ? 'Finish Session ✓' : 'Next →'}</button>
             </div>
           </div>
-          <div class="notes-panel">
-            <textarea id="annotator-notes" placeholder="Add notes, flag reasons, or edge-case observations…" rows="3"></textarea>
-          </div>
-          <div class="feedback-panel" id="feedback-panel">
-            <button class="btn btn-outline-dark" id="show-feedback-btn">Compare to Reference Annotation</button>
-            <div id="feedback-content" style="display:none;"></div>
-          </div>
-          <div class="sandbox-nav">
-            <button class="sandbox-btn prev" id="prev-sample" disabled>← Previous</button>
-            <span class="sandbox-counter" id="sandbox-counter">1 / ${SAMPLES.length}</span>
-            <button class="sandbox-btn next" id="next-sample">Next →</button>
-          </div>
         </div>
-      </div>
-      <div id="session-summary">
-        <h3>Session Complete 🎉</h3>
-        <p>You have annotated all samples in this training session.</p>
-        <div class="summary-stats">
-          <div class="stat-item">
-            <span class="stat-num" id="stat-annotated">0</span>
-            <span class="stat-desc">Samples Annotated</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-num" id="stat-flagged">0</span>
-            <span class="stat-desc">Items Flagged</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-num" id="stat-avg">—</span>
-            <span class="stat-desc">Avg. Rating</span>
-          </div>
-        </div>
-        <p style="color:var(--gray-60);font-size:14px;">Great work, annotator. Your session data has been recorded locally.</p>
-        <button class="btn btn-primary" id="restart-sandbox" style="margin-top:24px;">Annotate Again</button>
-      </div>
-    `;
-    trainingWorkspace.insertAdjacentHTML('beforeend', sandboxHTML);
+      `;
 
-    function buildRatingRows() {
-      const container = $('#rating-rows');
-      container.innerHTML = '';
-      DIMENSIONS.forEach(dim => {
-        const row = document.createElement('div');
-        row.className = 'rating-row';
-        row.dataset.dim = dim;
+      $('#check-answer-btn').addEventListener('click', () => {
+        const rows = mod.checkAnswer(s);
+        const html = rows.map(r => {
+          const cls = r.correct === null ? '' : (r.correct ? 'correct' : 'incorrect');
+          return `
+            <div class="compare-row ${cls}">
+              <span class="compare-mine">You: ${escapeHtml(r.mine)}</span>
+              <span class="compare-gold">Reference: ${escapeHtml(r.gold)}</span>
+            </div>`;
+        }).join('');
+        $('#gold-compare-content').innerHTML = html;
+        $('#gold-compare-content').style.display = 'block';
+        st.submitted.add(s.id);
+        const label = $('#training-progress-label');
+        const fill  = $('#training-bar-fill');
+        if (label) label.textContent = `${st.submitted.size} / ${total} completed`;
+        if (fill) fill.style.width = Math.round((st.submitted.size / total) * 100) + '%';
+      });
 
-        const label = document.createElement('span');
-        label.className = 'rating-label';
-        label.textContent = dim;
+      $('#prev-sample').addEventListener('click', () => {
+        if (st.index > 0) { st.index--; renderSample(name); }
+      });
 
-        const stars = document.createElement('div');
-        stars.className = 'rating-stars';
-        for (let i = 1; i <= 5; i++) {
-          const btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = 'star-btn';
-          btn.dataset.value = i;
-          btn.textContent = '★';
-          btn.title = `${i} star${i > 1 ? 's' : ''}`;
-          btn.addEventListener('click', () => {
-            $$('.star-btn', stars).forEach(b => b.classList.toggle('selected', +b.dataset.value <= i));
-            saveCurrentRating(dim, i);
-          });
-          stars.appendChild(btn);
+      $('#next-sample').addEventListener('click', () => {
+        if (st.index < total - 1) {
+          st.index++;
+          renderSample(name);
+        } else {
+          showModalitySummary(name);
         }
-
-        const flagBtn = document.createElement('button');
-        flagBtn.type = 'button';
-        flagBtn.className = 'flag-btn';
-        flagBtn.innerHTML = '<i class="fa-solid fa-flag"></i> Flag';
-        flagBtn.addEventListener('click', () => {
-          flagBtn.classList.toggle('flagged');
-          saveCurrentFlag(flagBtn.classList.contains('flagged'));
-        });
-
-        row.appendChild(label);
-        row.appendChild(stars);
-        row.appendChild(flagBtn);
-        container.appendChild(row);
-      });
-
-      // Confidence selector
-      const confContainer = $('#confidence-opts');
-      confContainer.innerHTML = '';
-      CONFIDENCE_LEVELS.forEach(level => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'confidence-btn';
-        btn.dataset.level = level;
-        btn.textContent = level;
-        btn.addEventListener('click', () => {
-          $$('.confidence-btn', confContainer).forEach(b => b.classList.remove('selected'));
-          btn.classList.add('selected');
-          saveCurrentConfidence(level);
-        });
-        confContainer.appendChild(btn);
       });
     }
 
-    function saveCurrentRating(dim, value) {
-      const id = SAMPLES[currentIndex].id;
-      if (!ratings[id]) ratings[id] = { dims: {}, flagged: false, notes: '', confidence: null };
-      ratings[id].dims[dim] = value;
-      persistProgress();
-      updateProgressBar();
-    }
+    function showModalitySummary(name) {
+      const mod = MODALITIES[name];
+      const st  = state[name];
 
-    function saveCurrentFlag(flagged) {
-      const id = SAMPLES[currentIndex].id;
-      if (!ratings[id]) ratings[id] = { dims: {}, flagged: false, notes: '', confidence: null };
-      ratings[id].flagged = flagged;
-      persistProgress();
-    }
+      const journey = getJourney();
+      const completedModalities = new Set((journey.training && journey.training.modalities) || []);
+      completedModalities.add(name);
+      markStepComplete('training', { modalities: [...completedModalities] });
 
-    function saveCurrentConfidence(level) {
-      const id = SAMPLES[currentIndex].id;
-      if (!ratings[id]) ratings[id] = { dims: {}, flagged: false, notes: '', confidence: null };
-      ratings[id].confidence = level;
-      persistProgress();
-    }
-
-    function saveNotes() {
-      const id = SAMPLES[currentIndex].id;
-      if (!ratings[id]) ratings[id] = { dims: {}, flagged: false, notes: '', confidence: null };
-      ratings[id].notes = $('#annotator-notes').value;
-      persistProgress();
-    }
-
-    function isSampleRated(id) {
-      const r = ratings[id];
-      return !!r && DIMENSIONS.every(d => r.dims && r.dims[d]);
-    }
-
-    function updateProgressBar() {
-      const completed = SAMPLES.filter(s => isSampleRated(s.id)).length;
-      const pct = Math.round((completed / SAMPLES.length) * 100);
-      const fill = $('#training-bar-fill');
-      const label = $('#training-progress-label');
-      if (fill) fill.style.width = pct + '%';
-      if (label) label.textContent = `${completed} / ${SAMPLES.length} completed`;
-    }
-
-    function restoreState() {
-      const id   = SAMPLES[currentIndex].id;
-      const state = ratings[id] || { dims: {}, flagged: false, notes: '', confidence: null };
-
-      // Restore star ratings
-      DIMENSIONS.forEach(dim => {
-        const savedVal = state.dims[dim] || 0;
-        const rows = $$('.rating-row', $('#rating-rows'));
-        rows.forEach(row => {
-          if (row.dataset.dim !== dim) return;
-          $$('.star-btn', row).forEach(btn => {
-            btn.classList.toggle('selected', +btn.dataset.value <= savedVal);
-          });
-          // Restore flag
-          const flagBtn = $('.flag-btn', row);
-          if (flagBtn) flagBtn.classList.toggle('flagged', state.flagged);
-        });
+      const accuracyKnown = [...st.submitted].length > 0;
+      root.innerHTML = `
+        <div id="session-summary" class="active">
+          <h3>Session Complete 🎉</h3>
+          <p>You've gone through all ${st.samples.length} live ${mod.label.toLowerCase()} samples in this set.</p>
+          <div class="summary-stats">
+            <div class="stat-item">
+              <span class="stat-num">${st.submitted.size}</span>
+              <span class="stat-desc">Samples Checked</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-num">${st.samples.length}</span>
+              <span class="stat-desc">Total in Set</span>
+            </div>
+          </div>
+          <p style="color:var(--gray-60);font-size:14px;">Switch modality tabs above to keep training on another modality, or restart this set.</p>
+          <button class="btn btn-primary" id="restart-modality" style="margin-top:24px;">Annotate Again</button>
+          <a href="certificate.html" class="btn btn-outline-dark" style="margin-top:12px;display:inline-flex;">Continue → Certificate ✓</a>
+        </div>`;
+      $('#restart-modality').addEventListener('click', () => {
+        st.index = 0;
+        st.submitted = new Set();
+        renderSample(name);
       });
+    }
 
-      // Restore confidence
-      $$('.confidence-btn', $('#confidence-opts')).forEach(btn => {
-        btn.classList.toggle('selected', btn.dataset.level === state.confidence);
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        if (tab.dataset.modality === currentModality) return;
+        switchModality(tab.dataset.modality);
       });
+    });
 
-      $('#annotator-notes').value = state.notes || '';
+    switchModality('text');
+  }
 
-      // Reset feedback panel for this sample
-      $('#feedback-content').style.display = 'none';
-      $('#feedback-content').innerHTML = '';
-      $('#show-feedback-btn').style.display = 'inline-block';
-    }
+  // ── Knowledge Library ────────────────────────────────────────
+  const libraryGrid = $('#library-grid');
+  if (libraryGrid) {
+    const LIB_BASE = 'https://raw.githubusercontent.com/AccurateDataAnnotator/accurate-data-annotator/main/library/';
+    const LIBRARY_MANIFEST = [
+      { icon: 'fa-book-open',      title: 'Annotation Guideline Manual',        desc: 'Core annotation standards and labeling conventions for ADA projects.', en: 'ADA_Annotation_Guideline_Manual.pdf', bi: 'ADA_Annotation_Guideline_Bilingual_Manual.pdf' },
+      { icon: 'fa-clipboard-check',title: 'QA Beginner Manual',                 desc: 'Quality-assurance checklist and review process for new annotators.', en: 'ADA_QA_Beginner_Manual_English_Only.pdf', bi: 'ADA_QA_Beginner__Bilingual_Manual.pdf' },
+      { icon: 'fa-shield-halved',  title: 'Content Moderation Guide',           desc: 'Policy framework and edge-case handling for content moderation tasks.', en: 'ADA_Content_Moderation_Guide_English.pdf', bi: 'ADA_Content_Moderation_Guide_Bilingual.pdf' },
+      { icon: 'fa-brain',          title: 'LLM Evaluation & RLHF Manual',       desc: 'Rating dimensions and best practices for LLM response evaluation.', en: 'ADA_LLM_Evaluation_RLHF_Manual.pdf', bi: 'ADA_LLM_Evaluation_RLHF_Bilingual_Manual.pdf' },
+      { icon: 'fa-terminal',       title: 'Prompt Engineering Basics',          desc: 'Foundational prompt-writing techniques used across ADA workflows.', en: 'ADA_Prompt_Engineering_Basics_EN.pdf', bi: 'ADA_Prompt_Engineering_Basics_Bilingual.pdf' },
+      { icon: 'fa-user-shield',    title: 'AI Security & Privacy Manual',       desc: 'Data handling, privacy, and security practices for annotators.', en: 'ADA_AI_Security_Privacy_Manual.pdf', bi: 'ADA_AI_Security_Privacy__Bilingual-Manual.pdf' },
+      { icon: 'fa-route',          title: 'Beginner Roadmap',                   desc: 'A step-by-step orientation guide for candidates starting at ADA.', en: 'ADA_Beginner_Roadmap.pdf', bi: null },
+    ];
 
-    function renderFeedback() {
-      const s = SAMPLES[currentIndex];
-      const id = s.id;
-      const state = ratings[id] || { dims: {} };
-      const rowsHTML = DIMENSIONS.map(dim => {
-        const mine = state.dims[dim] || '—';
-        const gold = s.gold[dim];
-        const diff = (typeof mine === 'number') ? Math.abs(mine - gold) : null;
-        const matchClass = diff === null ? '' : diff === 0 ? 'match' : diff === 1 ? 'close' : 'off';
-        return `
-          <div class="feedback-row ${matchClass}">
-            <span class="feedback-dim">${dim}</span>
-            <span class="feedback-mine">You: ${mine}★</span>
-            <span class="feedback-gold">Reference: ${gold}★</span>
-          </div>`;
-      }).join('');
+    libraryGrid.innerHTML = LIBRARY_MANIFEST.map(item => `
+      <div class="library-card">
+        <i class="fa-solid ${item.icon} library-card-icon"></i>
+        <h3>${item.title}</h3>
+        <p>${item.desc}</p>
+        <div class="library-links">
+          <a href="${LIB_BASE + encodeURIComponent(item.en)}" target="_blank"><i class="fa-solid fa-download"></i> English</a>
+          ${item.bi ? `<a href="${LIB_BASE + encodeURIComponent(item.bi)}" target="_blank" class="bilingual"><i class="fa-solid fa-download"></i> Bilingual (AR/EN)</a>` : ''}
+        </div>
+      </div>
+    `).join('');
+  }
 
-      $('#feedback-content').innerHTML = `
-        ${rowsHTML}
-        <p class="feedback-tip"><strong>Guideline note:</strong> ${s.tip}</p>
-      `;
-      $('#feedback-content').style.display = 'block';
-      $('#show-feedback-btn').style.display = 'none';
-    }
+  // ── Homepage: Live Sample Dataset Preview ───────────────────
+  const samplePreviewGrid = $('#sample-preview-grid');
+  if (samplePreviewGrid) {
+    const RAW_BASE = 'https://raw.githubusercontent.com/AccurateDataAnnotator/accurate-data-annotator/main/';
 
-    function renderSample() {
-      const s = SAMPLES[currentIndex];
-      $('#sample-type').textContent  = s.type;
-      $('#sample-text').textContent  = s.text;
-      $('#task-instruction').textContent = s.task;
-      $('#sandbox-counter').textContent  = `${currentIndex + 1} / ${SAMPLES.length}`;
-
-      // Meta tags
-      const meta = $('#sample-meta');
-      meta.innerHTML = `
-        <span class="task-tag">${s.type}</span>
-        <span class="task-tag">${s.language}</span>
-        <span class="task-tag">Sample #${s.id}</span>
-      `;
-
-      buildRatingRows();
-      restoreState();
-      updateProgressBar();
-
-      $('#prev-sample').disabled = currentIndex === 0;
-      $('#next-sample').textContent = currentIndex === SAMPLES.length - 1 ? 'Finish Session ✓' : 'Next →';
-      $('#next-sample').className = currentIndex === SAMPLES.length - 1
-        ? 'sandbox-btn finish' : 'sandbox-btn next';
-
-      persistProgress();
-    }
-
-    function showSummary() {
-      saveNotes();
-      document.getElementById('annotation-sandbox').style.display = 'none';
-      const bar = $('#training-progress-bar');
-      if (bar) bar.style.display = 'none';
-
-      const total      = SAMPLES.length;
-      const annotated  = Object.keys(ratings).length;
-      const flaggedCt  = Object.values(ratings).filter(r => r.flagged).length;
-
-      let totalStars = 0, starCount = 0;
-      Object.values(ratings).forEach(r => {
-        Object.values(r.dims).forEach(v => { totalStars += v; starCount++; });
-      });
-      const avg = starCount ? (totalStars / starCount).toFixed(1) : '—';
-
-      $('#stat-annotated').textContent = annotated;
-      $('#stat-flagged').textContent   = flaggedCt;
-      $('#stat-avg').textContent       = avg;
-      $('#session-summary').classList.add('active');
-
-      // Try to save to localStorage
+    (async () => {
       try {
-        localStorage.setItem('ada_session_' + Date.now(), JSON.stringify({
-          date: new Date().toISOString(),
-          annotated, flaggedCt, avg, ratings,
-        }));
-        localStorage.removeItem(SAVE_KEY);
-      } catch(e) {}
-    }
+        const res = await fetch(RAW_BASE + 'dataset/textDataset/ADA_Text_Data_Cleaned.csv');
+        const text = await res.text();
+        const lines = text.split(/\r?\n/).filter(Boolean);
+        const rows = lines.slice(1, 3); // header + first 2 data rows for a quick preview
+        const cards = rows.map(line => {
+          // naive split is fine here since we only display a short excerpt
+          const match = line.match(/^([^,]*),([^,]*),"?(.*?)"?,([^,]*),/);
+          const type = match ? match[2] : 'Sample';
+          const snippet = match ? match[3].slice(0, 140) : line.slice(0, 140);
+          return `
+            <div class="sample-preview-card">
+              <h4>Text Dataset</h4>
+              <p class="preview-text">"${snippet}${snippet.length >= 140 ? '…' : ''}"</p>
+              <div class="preview-tags"><span class="task-tag">${type}</span></div>
+            </div>`;
+        }).join('');
 
-    // Event: Next / Finish
-    $('#next-sample').addEventListener('click', () => {
-      saveNotes();
-      if (currentIndex < SAMPLES.length - 1) {
-        currentIndex++;
-        renderSample();
-      } else {
-        showSummary();
+        samplePreviewGrid.innerHTML = cards + `
+          <div class="sample-preview-card">
+            <h4>Audio Dataset</h4>
+            <audio controls preload="none" src="${RAW_BASE}dataset/audioDataset/${encodeURIComponent('A woman Voice.mp3')}"></audio>
+            <p class="preview-text">Real annotated audio clip from our training corpus.</p>
+          </div>
+          <div class="sample-preview-card">
+            <img src="${RAW_BASE}dataset/imagesDataset/Image-3.jpg" alt="Sample annotated image" loading="lazy">
+            <p class="preview-text">Teacher standing in front of a classroom teaching students — Education/Classroom category.</p>
+          </div>
+        `;
+      } catch (err) {
+        samplePreviewGrid.innerHTML = `<p style="color:var(--gray-60);">Live samples are temporarily unavailable — please check back shortly.</p>`;
       }
-    });
-
-    // Event: Previous
-    $('#prev-sample').addEventListener('click', () => {
-      saveNotes();
-      if (currentIndex > 0) {
-        currentIndex--;
-        renderSample();
-      }
-    });
-
-    // Auto-save notes on change
-    $('#annotator-notes').addEventListener('input', saveNotes);
-
-    // Compare to reference annotation
-    $('#show-feedback-btn').addEventListener('click', renderFeedback);
-
-    // Restart
-    $('#restart-sandbox').addEventListener('click', () => {
-      currentIndex = 0;
-      Object.keys(ratings).forEach(k => delete ratings[k]);
-      try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
-      $('#session-summary').classList.remove('active');
-      document.getElementById('annotation-sandbox').style.display = 'block';
-      const bar = $('#training-progress-bar');
-      if (bar) bar.style.display = 'block';
-      renderSample();
-    });
-
-    renderSample();
+    })();
   }
 
   // ── Certificate Generator ───────────────────────────────────
@@ -841,6 +1056,38 @@
   }
 
   function initCertificateGenerator() {
+    // ── Eligibility banner (soft gate — same convenience-only approach
+    // used elsewhere on the platform; there is no backend enforcing this) ──
+    const gateMount = $('#cert-gate-banner-mount');
+    if (gateMount) {
+      const journey = getJourney();
+      const requiredSteps = [
+        { key: 'register', label: 'Registration' },
+        { key: 'screening', label: 'Screening' },
+        { key: 'english', label: 'English Test' },
+        { key: 'llm', label: 'LLM Assessment' },
+        { key: 'training', label: 'Live Training' },
+      ];
+      const missing = requiredSteps.filter(s => !isStepDone(s.key));
+      const englishScore = journey.english && journey.english.score;
+      const belowPassMark = typeof englishScore === 'number' && englishScore < 60;
+
+      if (missing.length || belowPassMark) {
+        gateMount.innerHTML = `
+          <div class="cert-gate-banner">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <div>
+              <strong>Some steps look incomplete on this browser</strong>
+              You can still generate a preview below, but candidates are expected to finish everything first:
+              <ul>
+                ${missing.map(s => `<li>${s.label} — not yet marked complete</li>`).join('')}
+                ${belowPassMark ? `<li>English Test score (${englishScore}%) is below the 60% minimum</li>` : ''}
+              </ul>
+            </div>
+          </div>`;
+      }
+    }
+
     const canvas   = $('#cert-canvas');
     const ctx      = canvas.getContext('2d');
     const nameEl   = $('#cert-name');
@@ -996,6 +1243,7 @@
     certGenBtn.addEventListener('click', () => {
       if (!ensureName()) return;
       drawCertificate();
+      markStepComplete('certificate');
     });
 
     // Redraw live as fields change once first generated
