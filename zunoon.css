@@ -66,6 +66,10 @@ h1, h2, h3, h4, h5 {
 }
 
 /* ── Navigation ─────────────────────────────────────────────── */
+#main-content, #main-content > section, h1, h2, h3 {
+  scroll-margin-top: calc(var(--nav-h) + 16px);
+}
+
 #main-header {
   position: sticky;
   top: 0;
@@ -289,6 +293,25 @@ h1, h2, h3, h4, h5 {
   white-space: nowrap;
   transition: background 0.15s, color 0.15s;
 }
+
+#journey-reset-row {
+  max-width: 1100px;
+  margin: 6px auto 0;
+  text-align: right;
+}
+
+#journey-reset-btn {
+  background: none;
+  border: none;
+  color: var(--gray-40);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+
+#journey-reset-btn:hover { color: var(--white); }
 
 .journey-step .step-dot {
   width: 18px;
@@ -1689,6 +1712,24 @@ h1, h2, h3, h4, h5 {
   color: var(--black);
   margin-bottom: 16px;
   font-family: var(--font-head);
+}
+
+.score-tag {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gray-60);
+  margin-top: 12px;
+}
+
+/* Flags a question whose free-text answer looks too short/low-effort
+   to be a real response, so the candidate can find and fix it. */
+.answer-flag-junk {
+  border: 1.5px solid #d97706 !important;
+  background: #fff7ed;
+  border-radius: var(--radius);
+  padding: 16px !important;
 }
 
 .score-desc {
