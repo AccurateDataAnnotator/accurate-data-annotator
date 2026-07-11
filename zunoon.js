@@ -110,7 +110,33 @@
       `;
     }).join('');
 
-    mount.innerHTML = `<div class="journey-track">${html}</div>`;
+    const anyProgress = JOURNEY_STEPS.some(step => isStepDone(step.key));
+    const resetHTML = anyProgress ? `
+      <div id="journey-reset-row">
+        <button type="button" id="journey-reset-btn">New candidate on this device? Start fresh →</button>
+      </div>` : '';
+
+    mount.innerHTML = `<div class="journey-track">${html}</div>${resetHTML}`;
+
+    const resetBtn = $('#journey-reset-btn');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        if (confirm("This clears this browser's saved progress (steps completed, saved test drafts) so a new candidate can start clean. It does not delete anything already submitted to ADA. Continue?")) {
+          clearDeviceProgress();
+          location.reload();
+        }
+      });
+    }
+  }
+
+  // Wipes all Zunoon localStorage state for this browser — used when a new
+  // candidate is using a shared/public computer and needs a clean slate.
+  function clearDeviceProgress() {
+    try {
+      const keys = [];
+      for (let i = 0; i < localStorage.length; i++) keys.push(localStorage.key(i));
+      keys.filter(k => k && k.startsWith('ada_')).forEach(k => localStorage.removeItem(k));
+    } catch (e) {}
   }
   renderJourneyTracker();
 
@@ -439,6 +465,29 @@
     llmForm.addEventListener('change', updateLLMProgress);
     updateLLMProgress();
 
+    // ── Junk/low-effort answer detection ──────────────────────
+    // Applies only to free-text fields (radio/select choices are always
+    // legitimate — there's nothing "junk" about picking an option).
+    // Flags: empty, too short, a single repeated character ("aaaa"),
+    // or keyboard-mash-style input with no real word content.
+    function isJunkTextAnswer(value) {
+      const v = (value || '').trim();
+      if (!v) return true;
+      if (v.replace(/\s/g, '').length < 8) return true;           // too short to be a real answer
+      if (/^(.)\1*$/.test(v.replace(/\s/g, ''))) return true;      // "aaaaa", "nnnn"
+      const words = v.split(/\s+/).filter(w => w.length > 1);
+      if (words.length < 2) return true;                           // single token, e.g. "asdf"
+      return false;
+    }
+
+    function fieldKind(name) {
+      const el = llmForm.querySelector(`[name="${name}"]`);
+      if (!el) return 'other';
+      if (el.tagName === 'TEXTAREA') return 'text';
+      if (el.type === 'text') return 'text';
+      return 'choice'; // radio/select
+    }
+
     llmForm.addEventListener('submit', (e) => {
       e.preventDefault();
 
@@ -447,23 +496,58 @@
       const data    = new FormData(llmForm);
       const counted = new Set();
       let completed = 0;
+      let meaningful = 0;
+      const junkFields = [];
 
       for (let [k, v] of data.entries()) {
-        if (visible.has(k) && !counted.has(k) && v.trim()) {
-          counted.add(k);
-          completed++;
+        if (!visible.has(k) || counted.has(k) || !v.trim()) continue;
+        counted.add(k);
+        completed++;
+
+        if (fieldKind(k) === 'text' && isJunkTextAnswer(v)) {
+          junkFields.push(k);
+        } else {
+          meaningful++;
         }
       }
 
+      // If there are low-effort text answers, stop and ask the candidate
+      // to fix them before we accept the submission as final.
+      if (junkFields.length && !llmForm.dataset.confirmJunkSubmit) {
+        $$('.answer-flag-junk', llmForm).forEach(el => el.classList.remove('answer-flag-junk'));
+        junkFields.forEach(name => {
+          const el = llmForm.querySelector(`[name="${name}"]`);
+          const li = el && el.closest('li');
+          if (li) li.classList.add('answer-flag-junk');
+        });
+        const firstBad = llmForm.querySelector(`[name="${junkFields[0]}"]`);
+        if (firstBad) firstBad.closest('li').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        showScoreModal({
+          title: '⚠ A few answers need more detail',
+          score: null,
+          subtitle: `${junkFields.length} response${junkFields.length > 1 ? 's' : ''} look too short or incomplete`,
+          desc: 'These questions are reviewed by a human evaluator, so single letters or placeholder text won\'t give an accurate picture of your skills. Please go back and give a real answer to the highlighted question(s) — or submit anyway if you\'re intentionally leaving them brief.',
+          noReview: true,
+          continueLinks: [],
+          extraButtonLabel: 'Submit anyway',
+          onExtra: () => { llmForm.dataset.confirmJunkSubmit = '1'; llmForm.requestSubmit(); },
+        });
+        return;
+      }
+
+      delete llmForm.dataset.confirmJunkSubmit;
       try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
 
-      markStepComplete('llm', { track: llmForm.id });
+      markStepComplete('llm', { track: llmForm.id, completed, meaningful, total: TOTAL });
 
+      const pct = TOTAL ? Math.round((completed / TOTAL) * 100) : 0;
       showScoreModal({
         title: '✓ Assessment Submitted',
-        score: TOTAL ? Math.round((completed / TOTAL) * 100) : 0,
+        score: pct,
+        scoreLabel: 'Completion',
         subtitle: `${completed} of ${TOTAL} questions completed`,
-        desc: 'Your LLM evaluation responses have been recorded. ADA will review your submission and contact you with next steps.',
+        desc: 'This reflects how much of the assessment you completed, not a graded score — these are open evaluation questions reviewed by a human at ADA, who will contact you with next steps.',
         noReview: true,
         continueLinks: [{ href: 'training.html', label: 'Continue → Live Annotation Training' }],
       });
@@ -471,7 +555,7 @@
   }
 
   // ── Score Modal (shared) ────────────────────────────────────
-  function showScoreModal({ title, score, subtitle, desc, noReview, continueLinks }) {
+  function showScoreModal({ title, score, scoreLabel, subtitle, desc, noReview, continueLinks, extraButtonLabel, onExtra }) {
     const existing = $('#score-modal');
     if (existing) existing.remove();
 
@@ -479,17 +563,23 @@
       `<a href="${l.href}" class="btn btn-primary" style="margin-top:10px;width:100%;justify-content:center;">${l.label}</a>`
     ).join('');
 
+    const scoreHTML = (score === null || score === undefined) ? '' : `
+      ${scoreLabel ? `<div class="score-tag">${escapeHtml(scoreLabel)}</div>` : ''}
+      <div class="score-big">${score}%</div>
+    `;
+
     const modal = document.createElement('div');
     modal.id = 'score-modal';
     modal.className = 'active';
     modal.innerHTML = `
       <div class="score-card">
         <h2>${title}</h2>
-        <div class="score-big">${score}%</div>
+        ${scoreHTML}
         <div class="score-level">${subtitle}</div>
         <p class="score-desc">${desc}</p>
         ${!noReview ? `<button class="btn btn-primary" id="review-btn">Review Answers</button>` : ''}
         ${continueHTML}
+        ${extraButtonLabel ? `<button class="btn btn-outline-dark" id="extra-modal-btn" style="margin-top:10px;width:100%;justify-content:center;">${extraButtonLabel}</button>` : ''}
         <button class="btn btn-submit" id="close-modal-btn" style="margin-top:12px;">Close</button>
       </div>
     `;
@@ -501,6 +591,13 @@
       $('#review-btn').addEventListener('click', () => {
         modal.remove();
         window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+
+    if (extraButtonLabel && onExtra) {
+      $('#extra-modal-btn').addEventListener('click', () => {
+        modal.remove();
+        onExtra();
       });
     }
 
@@ -582,12 +679,6 @@
     });
   }
 
-  // ── Training / Live Annotation Sandbox (multi-modality) ─────
-  const trainingWorkspace = $('#training-workspace');
-  if (trainingWorkspace) {
-    initAnnotationSandbox();
-  }
-
   const GH_RAW_BASE = 'https://raw.githubusercontent.com/AccurateDataAnnotator/accurate-data-annotator/main/';
 
   function ghUrl(path) {
@@ -598,6 +689,30 @@
     return String(str == null ? '' : str).replace(/[&<>"']/g, c => (
       { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
     ));
+  }
+
+  // Fetch with a hard timeout so a slow/stalled connection can never leave
+  // the UI spinning forever — it always resolves to either data or an error.
+  async function fetchWithTimeout(url, ms = 15000) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), ms);
+    try {
+      const res = await fetch(url, { signal: controller.signal });
+      return res;
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        throw new Error('The dataset took too long to load. Check your connection and try again.');
+      }
+      throw new Error('Could not reach the dataset (network error). Check your connection and try again.');
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  // ── Training / Live Annotation Sandbox (multi-modality) ─────
+  const trainingWorkspace = $('#training-workspace');
+  if (trainingWorkspace) {
+    initAnnotationSandbox();
   }
 
   // Minimal RFC4180-ish CSV parser (handles quoted fields with commas/newlines)
@@ -688,7 +803,7 @@
         label: 'Text Annotation',
         note: 'Live from dataset/textDataset/ADA_Text_Data_Cleaned.csv on GitHub.',
         load: async () => {
-          const res = await fetch(ghUrl('dataset/textDataset/ADA_Text_Data_Cleaned.csv'));
+          const res = await fetchWithTimeout(ghUrl('dataset/textDataset/ADA_Text_Data_Cleaned.csv'));
           if (!res.ok) throw new Error('Could not fetch text dataset (' + res.status + ')');
           const rows = parseCSV(await res.text());
           TEXT_INTENTS = [...new Set(rows.map(r => r.Primary_Intent).filter(Boolean))].sort();
