@@ -6,6 +6,48 @@
 (function () {
   'use strict';
 
+  // ── ADA Notifications & Video Upload Config ─────────────────
+  // Fill these in once you've created your EmailJS account/template
+  // and deployed the Google Apps Script (see setup notes provided).
+  const ADA_CONFIG = {
+    EMAILJS_PUBLIC_KEY:  '0goZo5JRe5Unj1wFv',
+    EMAILJS_SERVICE_ID:  'service_ex4c2j9',
+    EMAILJS_TEMPLATE_ID: 'template_97niz6f',
+    DRIVE_UPLOAD_URL:    'https://script.google.com/macros/s/AKfycbyqhGaTvF9T_fHRmzabR4BttBeCuq-EYst55zvec7xyDBf84K5IvNEkF2zYsJZ8_9lv/exec',
+  };
+
+  // Loads the EmailJS SDK once, only if not already present.
+  function loadEmailJS(cb) {
+    if (window.emailjs) { cb(); return; }
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js';
+    s.onload = () => {
+      try { window.emailjs.init({ publicKey: ADA_CONFIG.EMAILJS_PUBLIC_KEY }); } catch (e) {}
+      cb();
+    };
+    s.onerror = () => {};
+    document.head.appendChild(s);
+  }
+
+  // Sends a notification email to ADA (batoul.hassaballa@gmail.com via
+  // the EmailJS template). Fails silently if not configured yet, so it
+  // never blocks or breaks the candidate's flow.
+  function notifyADA(params) {
+    if (ADA_CONFIG.EMAILJS_PUBLIC_KEY.startsWith('YOUR_')) return; // not configured yet
+    loadEmailJS(() => {
+      try {
+        window.emailjs.send(ADA_CONFIG.EMAILJS_SERVICE_ID, ADA_CONFIG.EMAILJS_TEMPLATE_ID, params);
+      } catch (e) {}
+    });
+  }
+
+  function formatDuration(ms) {
+    const mins = Math.round(ms / 60000);
+    if (mins < 60) return mins + ' min';
+    const h = Math.floor(mins / 60), m = mins % 60;
+    return h + 'h ' + m + 'm';
+  }
+
   // ── Utility ────────────────────────────────────────────────
   const $ = (sel, ctx = document) => ctx.querySelector(sel);
   const $$ = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
@@ -73,8 +115,29 @@
   function markStepComplete(key, extra) {
     try {
       const data = getJourney();
-      data[key] = Object.assign({}, (typeof data[key] === 'object' ? data[key] : {}), { done: true }, extra || {});
+      const isFirstTime = !(data[key] && data[key].done);
+      data[key] = Object.assign({}, (typeof data[key] === 'object' ? data[key] : {}), { done: true, at: Date.now() }, extra || {});
       localStorage.setItem(JOURNEY_KEY, JSON.stringify(data));
+
+      // Email notifications: candidate started (registration) / finished (certificate)
+      if (isFirstTime && key === 'register') {
+        notifyADA({
+          event_type: 'Candidate started',
+          candidate_name: 'Not yet provided (registers via Google Form)',
+          timestamp: new Date().toLocaleString(),
+          duration: '—',
+        });
+      }
+      if (isFirstTime && key === 'certificate') {
+        const startedAt = data.register && data.register.at;
+        const duration = startedAt ? formatDuration(Date.now() - startedAt) : 'Unknown (started on a different device/browser)';
+        notifyADA({
+          event_type: 'Candidate finished',
+          candidate_name: (extra && extra.candidateName) || 'Unknown',
+          timestamp: new Date().toLocaleString(),
+          duration: duration,
+        });
+      }
     } catch (e) {}
     renderJourneyTracker();
   }
@@ -612,6 +675,28 @@
     initCamera();
   }
 
+  // Uploads the screening recording to ADA's Google Drive folder via a
+  // Google Apps Script Web App (no backend server needed). Fails silently
+  // if not configured yet — the candidate's local download still works
+  // either way, so this never blocks their progress.
+  function uploadScreeningVideo(blob) {
+    if (ADA_CONFIG.DRIVE_UPLOAD_URL.startsWith('YOUR_')) return; // not configured yet
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64 = String(reader.result).split(',')[1];
+      fetch(ADA_CONFIG.DRIVE_UPLOAD_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' }, // avoids CORS preflight on Apps Script
+        body: JSON.stringify({
+          filename: 'ADA-screening-' + Date.now() + '.webm',
+          mimeType: 'video/webm',
+          data: base64,
+        }),
+      }).catch(() => {}); // best-effort; local download is the fallback
+    };
+    reader.readAsDataURL(blob);
+  }
+
   function initCamera() {
     const container = $('.video-container-placeholder');
     let stream      = null;
@@ -655,6 +740,8 @@
           a.download = 'ADA-screening-recording.webm';
           a.click();
           URL.revokeObjectURL(url);
+
+          uploadScreeningVideo(blob);
 
           markStepComplete('screening');
           const banner = $('#screening-confirmation-banner');
@@ -1358,7 +1445,7 @@
     certGenBtn.addEventListener('click', () => {
       if (!ensureName()) return;
       drawCertificate();
-      markStepComplete('certificate');
+      markStepComplete('certificate', { candidateName: nameEl.value.trim() });
     });
 
     // Redraw live as fields change once first generated
