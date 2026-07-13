@@ -2127,3 +2127,18 @@ h1, h2, h3, h4, h5 {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Zunoon badge — Live Training page only */
+.zunoon-badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #ffffff;
+  background-color: #CC0000;
+  border-radius: 999px;
+  padding: 4px 12px;
+  margin-left: 10px;
+  vertical-align: middle;
+}
