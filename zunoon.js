@@ -216,7 +216,7 @@
 
       const subject = encodeURIComponent(`ADA Inquiry from ${name}`);
       const body    = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${message}`);
-      window.location.href = `mailto:batoul.hassaballa@gmail.com?subject=${subject}&body=${body}`;
+      window.location.href = `mailto:info@accuratedataannotator.com?subject=${subject}&body=${body}`;
     });
   }
 
@@ -1258,37 +1258,66 @@
   }
 
   function initCertificateGenerator() {
-    // ── Eligibility banner (soft gate — same convenience-only approach
-    // used elsewhere on the platform; there is no backend enforcing this) ──
+    // ── Eligibility hard-gate ────────────────────────────────────────
+    // NOTE: this platform has no backend, so this cannot stop someone
+    // from editing localStorage in devtools. What it DOES do is stop the
+    // normal path: the Generate/Download buttons are actually disabled
+    // (not just a warning) until every required step shows complete on
+    // this browser and the English score is at least 60%.
     const gateMount = $('#cert-gate-banner-mount');
-    if (gateMount) {
+    const requiredSteps = [
+      { key: 'register', label: 'Registration' },
+      { key: 'screening', label: 'Screening' },
+      { key: 'english', label: 'English Test' },
+      { key: 'llm', label: 'LLM Assessment' },
+      { key: 'training', label: 'Live Training' },
+    ];
+
+    function checkEligibility() {
       const journey = getJourney();
-      const requiredSteps = [
-        { key: 'register', label: 'Registration' },
-        { key: 'screening', label: 'Screening' },
-        { key: 'english', label: 'English Test' },
-        { key: 'llm', label: 'LLM Assessment' },
-        { key: 'training', label: 'Live Training' },
-      ];
       const missing = requiredSteps.filter(s => !isStepDone(s.key));
       const englishScore = journey.english && journey.english.score;
-      const belowPassMark = typeof englishScore === 'number' && englishScore < 60;
+      const englishMissing = typeof englishScore !== 'number';
+      const belowPassMark = !englishMissing && englishScore < 60;
+      return {
+        eligible: !missing.length && !belowPassMark && !englishMissing,
+        missing, belowPassMark, englishMissing, englishScore,
+      };
+    }
 
-      if (missing.length || belowPassMark) {
-        gateMount.innerHTML = `
-          <div class="cert-gate-banner">
-            <i class="fa-solid fa-triangle-exclamation"></i>
+    function renderGate() {
+      const status = checkEligibility();
+
+      if (gateMount) {
+        gateMount.innerHTML = status.eligible ? `
+          <div class="cert-gate-banner cert-gate-ok">
+            <i class="fa-solid fa-circle-check"></i>
+            <div><strong>All requirements met</strong> — you're eligible to generate your certificate.</div>
+          </div>` : `
+          <div class="cert-gate-banner cert-gate-blocked">
+            <i class="fa-solid fa-lock"></i>
             <div>
-              <strong>Some steps look incomplete on this browser</strong>
-              You can still generate a preview below, but candidates are expected to finish everything first:
+              <strong>Certificate locked — finish these first</strong>
+              All steps below must be complete on this browser before a certificate can be generated:
               <ul>
-                ${missing.map(s => `<li>${s.label} — not yet marked complete</li>`).join('')}
-                ${belowPassMark ? `<li>English Test score (${englishScore}%) is below the 60% minimum</li>` : ''}
+                ${status.missing.map(s => `<li>${s.label} — not yet marked complete</li>`).join('')}
+                ${status.belowPassMark ? `<li>English Test score (${status.englishScore}%) is below the 60% minimum</li>` : ''}
+                ${status.englishMissing ? `<li>English Test — no score recorded yet</li>` : ''}
               </ul>
             </div>
           </div>`;
       }
+
+      if (certGenBtn) {
+        certGenBtn.disabled = !status.eligible;
+        certGenBtn.classList.toggle('btn-disabled', !status.eligible);
+        certGenBtn.title = status.eligible ? '' : 'Complete all steps (and score 60%+ on the English Test) to unlock';
+      }
+
+      return status.eligible;
     }
+
+    renderGate();
 
     const canvas   = $('#cert-canvas');
     const ctx      = canvas.getContext('2d');
@@ -1443,6 +1472,7 @@
     }
 
     certGenBtn.addEventListener('click', () => {
+      if (!renderGate()) return; // re-check eligibility even if disabled state was bypassed
       if (!ensureName()) return;
       drawCertificate();
       markStepComplete('certificate', { candidateName: nameEl.value.trim() });
