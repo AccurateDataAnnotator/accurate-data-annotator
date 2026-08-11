@@ -7,38 +7,27 @@
   'use strict';
 
   // ── ADA Notifications & Video Upload Config ─────────────────
-  // Fill these in once you've created your EmailJS account/template
-  // and deployed the Google Apps Script (see setup notes provided).
+  // Notifications and video uploads both go through the same Google
+  // Apps Script Web App (see GOOGLE_APPS_SCRIPT_setup.gs / SETUP_INSTRUCTIONS.md).
   const ADA_CONFIG = {
-    EMAILJS_PUBLIC_KEY:  '0goZo5JRe5Unj1wFv',
-    EMAILJS_SERVICE_ID:  'service_ex4c2j9',
-    EMAILJS_TEMPLATE_ID: 'template_97niz6f',
-    DRIVE_UPLOAD_URL:    'https://script.google.com/macros/s/AKfycbyqhGaTvF9T_fHRmzabR4BttBeCuq-EYst55zvec7xyDBf84K5IvNEkF2zYsJZ8_9lv/exec',
+    DRIVE_UPLOAD_URL: 'https://script.google.com/macros/s/AKfycbyqhGaTvF9T_fHRmzabR4BttBeCuq-EYst55zvec7xyDBf84K5IvNEkF2zYsJZ8_9lv/exec',
   };
 
-  // Loads the EmailJS SDK once, only if not already present.
-  function loadEmailJS(cb) {
-    if (window.emailjs) { cb(); return; }
-    const s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js';
-    s.onload = () => {
-      try { window.emailjs.init({ publicKey: ADA_CONFIG.EMAILJS_PUBLIC_KEY }); } catch (e) {}
-      cb();
-    };
-    s.onerror = () => {};
-    document.head.appendChild(s);
-  }
-
-  // Sends a notification email to ADA (batoul.hassaballa@gmail.com via
-  // the EmailJS template). Fails silently if not configured yet, so it
-  // never blocks or breaks the candidate's flow.
+  // Sends a notification email to ADA via the Apps Script Web App.
+  // Fails silently for the candidate (never blocks their flow), but
+  // logs success/failure to the console so it can be debugged.
   function notifyADA(params) {
-    if (ADA_CONFIG.EMAILJS_PUBLIC_KEY.startsWith('YOUR_')) return; // not configured yet
-    loadEmailJS(() => {
-      try {
-        window.emailjs.send(ADA_CONFIG.EMAILJS_SERVICE_ID, ADA_CONFIG.EMAILJS_TEMPLATE_ID, params);
-      } catch (e) {}
-    });
+    fetch(ADA_CONFIG.DRIVE_UPLOAD_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' }, // avoids CORS preflight on Apps Script
+      body: JSON.stringify(Object.assign({ action: 'notify' }, params)),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.ok) console.log('[ADA notify] sent OK:', params.event_type);
+        else console.error('[ADA notify] FAILED to send:', params.event_type, data);
+      })
+      .catch((err) => console.error('[ADA notify] request failed:', params.event_type, err));
   }
 
   function formatDuration(ms) {
@@ -94,8 +83,8 @@
   // NOTE: This is a client-side (localStorage) convenience tracker only.
   // It helps candidates see where they are in the process and softly
   // encourages completing steps in order — it is NOT secure access
-  // control (there is no backend), matching the same approach already
-  // used for the registration invite gate.
+  // control (there is no backend), matching the same approach used for
+  // the Live Training access gate.
   const JOURNEY_KEY = 'ada_journey_progress';
 
   const JOURNEY_STEPS = [
@@ -126,6 +115,16 @@
           candidate_name: 'Not yet provided (registers via Google Form)',
           timestamp: new Date().toLocaleString(),
           duration: '—',
+        });
+      }
+      if (isFirstTime && key === 'training') {
+        const startedAt = data.register && data.register.at;
+        const duration = startedAt ? formatDuration(Date.now() - startedAt) : 'Unknown (started on a different device/browser)';
+        notifyADA({
+          event_type: 'Candidate finished Live Training',
+          candidate_name: 'Not yet provided (name is captured later at Certificate step)',
+          timestamp: new Date().toLocaleString(),
+          duration: duration,
         });
       }
       if (isFirstTime && key === 'certificate') {
@@ -220,68 +219,26 @@
     });
   }
 
-  // ── Registration Invitation Gate ────────────────────────────
-  // NOTE: This is a client-side convenience gate only — it keeps casual
-  // visitors from stumbling into the application form, but it is NOT secure
-  // (anyone can read this file). Do not treat it as real access control.
-  // To add/remove codes, edit VALID_INVITE_CODES below. Codes are matched
-  // case-insensitively and trimmed.
+  // ── Registration (open to everyone — no invite code required) ──
+  // Registration, Screening, English Test, and the LLM Assessment are free
+  // and open by default.
+  //
+  // FOUNDER_ACCESS_CODE below is Batoul's own private code — it is the ONLY
+  // free bypass at the Live Training paywall now. The old public codes
+  // (ADA-2026, ADA-COHORT1, ZUNOON-VIP) are retired as of 2026-08-11: they
+  // were already sent to 21 candidates, so leaving them active would let
+  // anyone who has one skip payment forever. Per Batoul's decision, this
+  // applies with no exceptions — including the 14 candidates already
+  // mid-journey on an old code; they now pay $3 like any new candidate.
+  // Keep this array to a single, unpublished code — do not add more.
+  const FOUNDER_ACCESS_CODE = 'ADA-FOUNDER-2026';
   const VALID_INVITE_CODES = [
-    'ADA-2026',
-    'ADA-COHORT1',
-    'ZUNOON-VIP',
+    FOUNDER_ACCESS_CODE,
   ];
 
-  const inviteInput  = $('#invite-code-input');
-  const inviteBtn    = $('#invite-submit-btn');
-  const inviteStatus = $('#invite-status');
-  const inviteGate   = $('#invite-gate');
   const regActionBox = $('#registration-action-box');
 
-  if (inviteBtn && inviteInput && regActionBox) {
-    const UNLOCK_KEY = 'ada_invite_verified';
-
-    function unlockRegistration(silent) {
-      regActionBox.classList.remove('locked');
-      inviteStatus.textContent = 'Code accepted — you can now fill out the application form below.';
-      inviteStatus.className = 'status-ok';
-      inviteInput.disabled = true;
-      inviteBtn.disabled = true;
-      const postNote = $('#post-register-note');
-      if (postNote) postNote.style.display = 'block';
-    }
-
-    // Restore prior verification for this browser (convenience only)
-    try {
-      if (localStorage.getItem(UNLOCK_KEY) === '1') unlockRegistration(true);
-    } catch (e) {}
-
-    function tryUnlock() {
-      const entered = inviteInput.value.trim().toUpperCase();
-      const isValid = VALID_INVITE_CODES.some(c => c.toUpperCase() === entered);
-
-      if (!entered) {
-        inviteStatus.textContent = 'Please enter your invitation code.';
-        inviteStatus.className = 'status-error';
-        return;
-      }
-
-      if (isValid) {
-        try { localStorage.setItem(UNLOCK_KEY, '1'); } catch (e) {}
-        unlockRegistration(false);
-      } else {
-        inviteInput.classList.add('input-error');
-        setTimeout(() => inviteInput.classList.remove('input-error'), 400);
-        inviteStatus.textContent = 'That code isn\'t recognized. Double-check the email from ADA, or contact us if you believe this is an error.';
-        inviteStatus.className = 'status-error';
-      }
-    }
-
-    inviteBtn.addEventListener('click', tryUnlock);
-    inviteInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') { e.preventDefault(); tryUnlock(); }
-    });
-
+  if (regActionBox) {
     const confirmRegBtn = $('#confirm-registration-btn');
     if (confirmRegBtn) {
       confirmRegBtn.addEventListener('click', () => {
@@ -794,6 +751,71 @@
     } finally {
       clearTimeout(timer);
     }
+  }
+
+  // ── Live Training: Payment Gate ─────────────────────────────
+  // NOTE: this is a client-side convenience gate only, not real access
+  // control (no backend exists). Entering FOUNDER_ACCESS_CODE here is the
+  // ONLY free bypass — reserved for Batoul as founder/monitor. Everyone
+  // else pays $3 via PayPal and gets a training access code by email,
+  // added to VALID_TRAINING_CODES. To add a new paying candidate's code,
+  // add it to VALID_TRAINING_CODES.
+  const VALID_TRAINING_CODES = [
+    'ADA-PAID-0001',
+  ];
+
+  const paymentGate      = $('#payment-gate');
+  const trainingBox      = $('#training-content-box');
+  const trainingAccessIn = $('#training-access-input');
+  const trainingAccessBt = $('#training-access-btn');
+  const trainingAccessSt = $('#training-access-status');
+
+  if (paymentGate && trainingBox && trainingAccessIn && trainingAccessBt) {
+    const TRAINING_UNLOCK_KEY = 'ada_training_unlocked';
+
+    function unlockTraining(silent) {
+      trainingBox.classList.remove('locked');
+      paymentGate.innerHTML = `
+        <div class="cert-gate-banner cert-gate-ok">
+          <i class="fa-solid fa-circle-check"></i>
+          <div><strong>Access unlocked</strong> — you're all set to start Live Training below.</div>
+        </div>`;
+    }
+
+    // Free bypass: already-verified invite code unlocks training too.
+    // Otherwise, restore prior training-specific unlock for this browser.
+    try {
+      const inviteVerified = localStorage.getItem('ada_invite_verified') === '1';
+      const trainingVerified = localStorage.getItem(TRAINING_UNLOCK_KEY) === '1';
+      if (inviteVerified || trainingVerified) unlockTraining(true);
+    } catch (e) {}
+
+    function tryUnlockTraining() {
+      const entered = trainingAccessIn.value.trim().toUpperCase();
+      const isValid = VALID_INVITE_CODES.some(c => c.toUpperCase() === entered) ||
+                       VALID_TRAINING_CODES.some(c => c.toUpperCase() === entered);
+
+      if (!entered) {
+        trainingAccessSt.textContent = 'Please enter your access or invitation code.';
+        trainingAccessSt.className = 'status-error';
+        return;
+      }
+
+      if (isValid) {
+        try { localStorage.setItem(TRAINING_UNLOCK_KEY, '1'); } catch (e) {}
+        unlockTraining(false);
+      } else {
+        trainingAccessIn.classList.add('input-error');
+        setTimeout(() => trainingAccessIn.classList.remove('input-error'), 400);
+        trainingAccessSt.textContent = 'That code isn\'t recognized. Check the email from ADA after payment, or contact us if you believe this is an error.';
+        trainingAccessSt.className = 'status-error';
+      }
+    }
+
+    trainingAccessBt.addEventListener('click', tryUnlockTraining);
+    trainingAccessIn.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); tryUnlockTraining(); }
+    });
   }
 
   // ── Training / Live Annotation Sandbox (multi-modality) ─────
