@@ -2036,6 +2036,36 @@ h1, h2, h3, h4, h5 {
 #invite-status.status-ok { color: #1d8a4e; }
 .action-box.locked { opacity: 0.35; pointer-events: none; filter: grayscale(1); }
 
+/* ── Live Training: Payment Gate ──────────────────────────────── */
+#payment-gate {
+  max-width: 460px;
+  margin: 0 auto 32px;
+  border: 1px solid var(--gray-20);
+  border-radius: var(--radius-lg);
+  padding: 28px 24px;
+  text-align: center;
+}
+#payment-gate h3 { font-size: 18px; margin-bottom: 8px; }
+#payment-gate p { font-size: 14px; color: var(--gray-60); margin-bottom: 18px; }
+#pay-training-link { width: 100%; justify-content: center; margin-bottom: 4px; }
+#payment-gate .gate-divider { font-size: 12px; color: var(--gray-60); margin: 18px 0 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+#training-access-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--gray-20);
+  border-radius: var(--radius);
+  font-size: 16px;
+  text-align: center;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+#training-access-input:focus { outline: none; border-color: var(--red); }
+#training-access-input.input-error { border-color: var(--red); animation: shake 0.3s; }
+#training-access-status { font-size: 13px; margin-top: 10px; min-height: 18px; }
+#training-access-status.status-error { color: var(--red); }
+#training-access-status.status-ok { color: #1d8a4e; }
+
 /* ── Homepage: Live Sample Preview ────────────────────────────── */
 #sample-preview-section .section-header { margin-bottom: 32px; }
 .sample-preview-grid {
