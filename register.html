@@ -38,22 +38,14 @@
     <main id="main-content" class="container-center">
         <section id="registration-gateway">
             <h2>Onboarding Registration</h2>
-            <p>ADA's training track is invitation-only. Enter the invitation code you received from our team to unlock the enrollment form.</p>
+            <p>Start your ADA candidate journey below — Registration, Screening, English Test, and the LLM Assessment are open and free to everyone.</p>
 
-            <div id="invite-gate">
-                <h3><i class="fa-solid fa-lock"></i> Invitation Required</h3>
-                <p>Selected candidates receive a code by email after their application is reviewed. Don't have one yet? Reach out via our <a href="index.html#contact-section" style="color:var(--red);text-decoration:underline;">contact form</a>.</p>
-                <input type="text" id="invite-code-input" placeholder="Enter invitation code" autocomplete="off">
-                <button class="btn btn-primary" id="invite-submit-btn" style="width:100%;justify-content:center;">Unlock Registration</button>
-                <div id="invite-status"></div>
-            </div>
-
-            <div class="action-box locked" id="registration-action-box">
+            <div class="action-box" id="registration-action-box">
                 <a href="https://docs.google.com/forms/d/e/1FAIpQLScfqdBhbV3Egj5fHU6ScqV1W0chAoA2L-x251EytD04vistKg/viewform?usp=publish-editor" target="_blank" class="btn btn-action" id="fill-application-link">
                     <i class="fa-solid fa-file-signature"></i> Fill Application Form
                 </a>
 
-                <div class="post-action-note" id="post-register-note" style="display:none;">
+                <div class="post-action-note" id="post-register-note">
                     <p>Already filled out and submitted the application form above?</p>
                     <button class="btn btn-outline-dark" id="confirm-registration-btn">Yes, I've Submitted It — Continue</button>
                 </div>
