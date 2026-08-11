@@ -40,20 +40,34 @@
             <h2>Live Annotations Training Module <span class="zunoon-badge">Powered by Zunoon</span></h2>
             <p>Annotate real samples pulled live from ADA's production dataset repository, then compare your answers against the reference (gold) labels.</p>
 
-            <!-- Modality Tabs: wired by zunoon.js -->
-            <div id="modality-tabs">
-                <button class="modality-tab" data-modality="text"><i class="fa-solid fa-comment-dots"></i>Text</button>
-                <button class="modality-tab" data-modality="image"><i class="fa-solid fa-image"></i>Image</button>
-                <button class="modality-tab" data-modality="audio"><i class="fa-solid fa-microphone"></i>Audio</button>
-                <button class="modality-tab" data-modality="video"><i class="fa-solid fa-video"></i>Video</button>
-                <button class="modality-tab" data-modality="multimodal"><i class="fa-solid fa-layer-group"></i>Multimodal</button>
+            <div id="payment-gate">
+                <h3><i class="fa-solid fa-lock"></i> Payment Required</h3>
+                <p>Live Training and your Certificate are part of ADA's paid track ($3). Pay securely via PayPal, then enter the access code you receive by email to unlock this step.</p>
+                <a href="https://www.paypal.com/ncp/payment/TAZK24ZL98KPL" target="_blank" class="btn btn-action" id="pay-training-link">
+                    <i class="fa-brands fa-paypal"></i> Pay $3 via PayPal
+                </a>
+                <div class="gate-divider">Already paid, or have an invitation code?</div>
+                <input type="text" id="training-access-input" placeholder="Enter your access or invitation code" autocomplete="off">
+                <button class="btn btn-primary" id="training-access-btn" style="width:100%;justify-content:center;">Unlock Live Training</button>
+                <div id="training-access-status"></div>
             </div>
-            <p class="dataset-source-note" id="dataset-source-note"></p>
 
-            <div id="training-modality-root">
-                <div class="modality-loading">
-                    <i class="fa-solid fa-spinner fa-spin"></i>
-                    Loading live dataset from the ADA GitHub repository&hellip;
+            <!-- Modality Tabs: wired by zunoon.js -->
+            <div class="action-box locked" id="training-content-box">
+                <div id="modality-tabs">
+                    <button class="modality-tab" data-modality="text"><i class="fa-solid fa-comment-dots"></i>Text</button>
+                    <button class="modality-tab" data-modality="image"><i class="fa-solid fa-image"></i>Image</button>
+                    <button class="modality-tab" data-modality="audio"><i class="fa-solid fa-microphone"></i>Audio</button>
+                    <button class="modality-tab" data-modality="video"><i class="fa-solid fa-video"></i>Video</button>
+                    <button class="modality-tab" data-modality="multimodal"><i class="fa-solid fa-layer-group"></i>Multimodal</button>
+                </div>
+                <p class="dataset-source-note" id="dataset-source-note"></p>
+
+                <div id="training-modality-root">
+                    <div class="modality-loading">
+                        <i class="fa-solid fa-spinner fa-spin"></i>
+                        Loading live dataset from the ADA GitHub repository&hellip;
+                    </div>
                 </div>
             </div>
         </section>
