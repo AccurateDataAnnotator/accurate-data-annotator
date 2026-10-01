@@ -1404,7 +1404,8 @@
     const canvas   = $('#cert-canvas');
     const ctx      = canvas.getContext('2d');
     const nameEl   = $('#cert-name');
-    const trackEl  = $('#cert-track');
+    // One certificate for the COMPLETE program. There is no per-track choice.
+    const PROGRAM_TITLE = 'Bilingual Data Annotation & LLM Evaluation Specialist';
     const dateEl   = $('#cert-date');
     const actions  = $('#cert-actions');
 
@@ -1435,7 +1436,7 @@
     function drawCertificate() {
       const W = canvas.width, H = canvas.height;
       const name  = nameEl.value.trim() || 'Candidate Name';
-      const track = trackEl.value;
+      const track = PROGRAM_TITLE;
       const date  = formatDate(dateEl.value);
       const certId = genCertId(name);
       canvas.dataset.certId = certId;
@@ -1511,7 +1512,7 @@
       // Track line
       ctx.fillStyle = '#cccccc';
       ctx.font = '400 18px "DM Sans", sans-serif';
-      ctx.fillText('has successfully completed the ADA candidate certification program as a', W / 2, 450);
+      ctx.fillText('has successfully completed the full ADA candidate certification program as a', W / 2, 450);
 
       ctx.fillStyle = '#ffffff';
       ctx.font = '700 26px "Syne", sans-serif';
@@ -1572,7 +1573,7 @@
     });
 
     // Redraw live as fields change once first generated
-    [nameEl, trackEl, dateEl].forEach(el => {
+    [nameEl, dateEl].forEach(el => {
       el.addEventListener('input', () => {
         if (actions.style.display !== 'none') drawCertificate();
       });
@@ -1619,7 +1620,7 @@
       link.click();
 
       const text = encodeURIComponent(
-        `I'm proud to share that I've completed the ADA ${trackEl.value} certification program with Accurate Data Annotator! 🎉\n\n#DataAnnotation #LLM #AI #ADA`
+        `I'm proud to share that I've completed the full ADA ${PROGRAM_TITLE} certification program with Accurate Data Annotator! 🎉\n\n#DataAnnotation #LLM #AI #ADA`
       );
       setTimeout(() => {
         alert('Your certificate image has been downloaded. LinkedIn will now open a new post — attach the downloaded image to complete your share.');
