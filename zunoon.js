@@ -89,7 +89,6 @@
 
   const JOURNEY_STEPS = [
     { key: 'register',    label: 'Registration',   pages: ['register.html'] },
-    { key: 'screening',   label: 'Screening',      pages: ['screening.html'] },
     { key: 'english',     label: 'English Test',   pages: ['english-test.html'] },
     { key: 'llm',         label: 'LLM Assessment', pages: ['llm.html', 'bilingual-llm.html'] },
     { key: 'training',    label: 'Live Training',  pages: ['training.html'] },
@@ -202,6 +201,9 @@
   }
   renderJourneyTracker();
 
+  // Video screening was removed (Oct 2026): hide any leftover Screening menu link
+  document.querySelectorAll('a[href="screening.html"]').forEach(a => { (a.closest('li') || a).remove(); });
+
   // ── Contact form (index.html) ──────────────────────────────
   const contactForm = $('#contact-form');
   if (contactForm) {
@@ -220,7 +222,7 @@
   }
 
   // ── Registration (open to everyone — no invite code required) ──
-  // Registration, Screening, English Test, and the LLM Assessment are free
+  // Registration, English Test, and the LLM Assessment are free
   // and open by default.
   //
   // The founder code (hash stored below) is Batoul's own private code — it is the ONLY
@@ -1349,7 +1351,6 @@
     const gateMount = $('#cert-gate-banner-mount');
     const requiredSteps = [
       { key: 'register', label: 'Registration' },
-      { key: 'screening', label: 'Screening' },
       { key: 'english', label: 'English Test' },
       { key: 'llm', label: 'LLM Assessment' },
       { key: 'training', label: 'Live Training' },
