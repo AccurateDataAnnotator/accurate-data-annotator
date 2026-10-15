@@ -1356,15 +1356,242 @@
       { key: 'training', label: 'Live Training' },
     ];
 
+    // ── Certificate fee ($1.50, one time) ────────────────────────────
+    // The training is free; only the certificate has a fee. After paying with
+    // PayPal, the candidate receives a certificate code from ADA by email and
+    // enters it here. Only SHA-256 fingerprints of the codes are stored in this
+    // file, so reading it does not reveal them. The founder code also works.
+    // NOTE: like the rest of this platform (no backend), this is a convenience
+    // gate, not bank-grade security.
+    const CERT_PAYPAL_URL = 'https://www.paypal.com/ncp/payment/DW2YEEWJPU7YJ';
+    const CERT_UNLOCK_KEY = 'ada_cert_unlock_hash';
+    const CERT_CODE_HASHES = [
+      'a8a2667eed4b8be79d288ce6e87a5fb03b6e5a330938ec39c26e81b4d4c244ac',
+      '3fbbaacddd7d5502637c58c5cff7defd3a48698d448a2594cdbe71f0d15155dd',
+      '3e8cf40d62762d322407d8cef8e3b41e9d2bc8610a337c20222701e300c82271',
+      '891f348ae26f42b600db65e39ccdacf72af6b27cbb400d56b050cab07b20a0a0',
+      'ef2fb8574bf852bba7a6ab4ec190b0ba252b0ee4b3aa1e35145c97456063b0ae',
+      'ea2d3ea136fe6292be6d3228b035254a6920b7b748ea5723bad44f5316c00333',
+      '1ead5bff6b7337ce83f0bb787ac91339a3e8aeebd34907d2b94548f19285cd98',
+      'cbf586039ff7976c05d224610868afca4f669e4bfffd6539c3bdb1e23f430ebb',
+      'bd9548078750996f3b8a6cc2dc3ddb33b2fe7c937bd912b56dedf49513001864',
+      '945556000a0c109a38be8d66aa96fda9e48b85f2044952d719190611e6f6122b',
+      '50e3ca13f1adcf74d0d823719547d0de88342f0581e336ae3067fcfabf1039bd',
+      '4c5396b82915a91cea13d3b950ab56bd3ed986b151c2e70dc47db1abb258f7b6',
+      '5db0f0754dc308ad4db1f04fc1267d2abec9b0037ca8c443af617331c80fa41b',
+      '8bddcfeb061d1c0ee0d6d1844104fb9ed72faba56215b150fec2709fe5d8b1e9',
+      'f77d28119b849d34975738ee7f7010fc40c9a658a556d7dd0fb140724cf08e84',
+      '7863d7097d79bdd37e303c4046408a8cb1f42668c7cb4ab9acee2fcb5d754827',
+      'ede1e52ded0301254b2083f229437a0fd6b6228863c69c521fc22aea4b3ad83b',
+      'ca89353c66331c687c3fbca8b4f4167ad5893dff63642b07d7a7dd7d791f15d3',
+      '5781241bcb40082d5c4ae87c3d0dc7e66bccac1a9c34da9434494c60ae048ed7',
+      '3c208c10d527a0c2a9267b6ca8ad34190eb5b3b0367aed1ac43b4dfb33e750c4',
+      'ac88c4ad26bb14fb8b422c86ca51a732cdea833604884ea968bbbe9a5cf0a4a6',
+      '79c702b2f801bab9664e3d682cd4b50f42bc979b7f95ec53e00b06bcacce6fe8',
+      'ef8b55aaf450aa539ac70579c04a88be15d9b2f4320006f65b377234184a047d',
+      'c9d595c5a9e49304e8a3e3eefdf6c0077052d86d4fa587be062c89d745226ec6',
+      '73545de1479c8dc4bed48814b1348b932e9a999ab94da63c8a3f54c6e10aa9fd',
+      '33501aa71ac1533b6ce3ebdb9a24c7b850eb01f07b6457371cf6d23719c5aab1',
+      '5d1c7af361be2aa99a87b82f5d204d1a1fc65b268a2aad196c356fc79099c789',
+      'f0ebb7fd661978377922445c81838a4b67f201b4da8c4c3a9de6903f8ce46d6d',
+      'e83b7946b6c329d2f4689b4acd274c3d8583355132901f69583284bf27a156a8',
+      'a0fcdc25b7a390a1e69b8a4700dda2dd8c0db5a2b3a5f5e960f387aef66120d6',
+      '62f790630833058ac99bdcb2cbc24488c346238d3835db0e5fdc10368cffbcbd',
+      '7a7d362c62726d3ae5706a2ea5af62ab0196e93fc368c03acffa8204bec01fdf',
+      '5673ffe78263b032aab31bfd9272e4226a3088be1eae0377a74e3d9ec4d0b2e5',
+      '44d75cf409f3f7c99a4a864b9339cd718331ef3cb33d21c770c1ce6c63103050',
+      '604f2c0d23124d4619c41d9f26965040149425ba89945628937ace2d4108900a',
+      'fa01bd63eb71e2547cb00e531547b7d7353e430c021607a9ff4cf9a592265f88',
+      '9a83f072f57cfa6518106affc87d56b27875785591c05a54fd4cab7b511a19e1',
+      'f43b905a6eb37c47b90275455a3f4e7be97d0ef60e071d9fff40b0993ab2757f',
+      'ac2eb29a616b7e4ba06513a4bc1af15786137d45a7a1536871feb85a0bf30058',
+      '4e68071c28e8aaf73a3d90a0ab2d3f564ab4caa100cfe12ded452febcea34064',
+      'ec0610141df0ee8f8553e15175de912ec80d52a11388608d6e3c098b07eda73f',
+      '7c8f0f8788d121929087548e46a0745eb3ad69b5faf98fc5dc0f5dc0ae12a077',
+      '8b6c04b81c56f8ffb7b9e12606a0e00b992bc0aebc1d2df53264cbb4b0ee039f',
+      'd143c3a720258415e801aa6b3d61834e3a46d13ce3e5afe0d3d1af8a2825974e',
+      '9283b47c55a5de9550a50b18699e24a73bcb6d4cd9e9eeb155ef7f04fdc833bf',
+      '9abd5e21047e10fb79a573babae9489d5909d3eef9990e1cea0b138de254d419',
+      'f905bf6550165eec683ae9068df3f4a1701a152829573a9dd3c14e9a7129091c',
+      'ea2d8f84f1b3a6f6ec82e711c8a99ad82c1465002f6a615a136d267015ec8131',
+      '87a34ff581a56d3321266e8ff26a23417f46aecafa904151b70d42b75dd2f692',
+      '05b7693e55b05f35cdccf9519dd4fe5b792efd4b41a8e8b0dc30e82ffc4a1cc4',
+      'd16eba71f8310cae3d53bb7db6989e0c99aea5be635cfa35e30c430cebc086f4',
+      'e0ea043faa9c01d282d43bd375cd36ad0a96d5ae1465faf63d89468632caada7',
+      'b13e163ad92116c55b3646035068b5c8cf3fa4a05e2c64bd89a58d4a98f1cdff',
+      '39a4e7ac7035aaa184899f0f28746bcb38e712e92051fcbb568e8002cf7903fe',
+      '851813212faadbf7f100984562d7f95f45238b470e0dc26a6931719493f77a99',
+      '4949c36b2c39b0f5114cd2d66f1f0fbb99ad9fe0169e469f01a9fc437093665c',
+      'de1b062f1d9010706ddb17348f3b2962a73a98fdbbd579aa097caeb6f77b7841',
+      'ce9c34231553e8f48683966239ab3ffd70e0328ef8b212ffc066e82676f387c4',
+      '4f6670c554afac438129dba1dcefd4b15200105e92eae63df4bc972bf1861a61',
+      '08c0934cfc44260aead987c0fb24d3aa2180f03ccce383ccbe554474ffeda0b9',
+      '8f1f8aa63810c490ffa630cba65dfb4aed12f2b19e5c056d5aabc2b78900ba2f',
+      '188edc80f76f790427fa011f36dfda34cfbfbd85dae723bf86a62bb1d2c9067c',
+      '020bbfd066ef39b5b66cd9f9b74afa26d3f8baadad1cd1739c4655b4606eb8cb',
+      '04fd48a422618a1dbc11efe35363c27d90d9aa446b80f92bdeaf43b898a8dce1',
+      '813d6bdfa4d6d7c01dab338677304ca321f7d1840bc0c3059b092f8d8284ac9a',
+      'c53aa70cc295b61cafd63d01835dd6c68809c518f1276740922c9c13dc3af675',
+      'ffa074d4ca923c97aa7e2eba2cd9679a1214abd1d12d9a711869171fb51fb62a',
+      '8b5270ee61979f7184594251cce620faf2f430ea5f11d78ca2a80e29680a4ce7',
+      'f3c7b00129d91445a62e649a20d758fe592f9ee8afa401d639246a56ed922f8b',
+      'bf74d35e50b46b7a88c0eaa2dfb129950a5d6b5846ec8dc3548a0728cdecaa13',
+      '8d2c90e307cda38b5060bd377eed65cbed14409dc3f4f1e553a1c4913ea31cae',
+      '7debe72c0cb9f874b9c321fedd6bbc74e72d2cd80f490e0e2420e6c594b7ac2b',
+      'b23368054aad1c51a2c93eb2847510410b5904252787e0effcabf0d94569b06f',
+      '7db423a6002f2e667978315ecc79eed79017be26a120a2d5b94973ec47f0b557',
+      '8a699c854f24593aeabce8f813a38bf0f16232bf29657b5f8a883511a9e5b35f',
+      '32b65f76c9d44f25b67e2fdb529a40196c2f436427ac36e37ecc345f63a9fed4',
+      'c089fb99cc1e84738c0c3bdb26b53eefa8268858f1f35b893f93f0f13a03dfb4',
+      'ceba0e8638999721c73a0beacf3909f515a8603ea5e7cca9cdbbb998d5703464',
+      'cad1dd25257861407eeb14317c200ec6175f1a266d224b73d090c2d7f1b6d902',
+      '065d812b1e8f590f6dc86937fc634cd91e86ff40a30e507cb867d3e7a789170a',
+      '5965b922dbf10055dca26e534c777df2dbe9ddc88152380dfb3dc5ccbca63689',
+      '8608a357509c09e56c48449ad61c845612e4f54a4cae06d07c54c5df8cd23451',
+      '771d646ccfc97efb764de94a130f9a7a6ed9a682d965d6e321585f029dcd53d7',
+      '1ee8a079b1f8eaec8e71970dedd64d8a6bf4960e94e0983fdca1181958912ddd',
+      'ced7c65f2743702f3d08069f8b03bc7db6cf7fd252224775c8f4fc3799bbe80c',
+      '5beedbb5fce7a1c3cd56f49c9dfd8ef6780ccac92cd1cab89e32ee057a15da49',
+      '8d9ef38f582a128d99a524c4ac63004350fd6608c5b0658ce4a4233b28d725eb',
+      '4e142333acd5bf02dd3fc865c4d82bf1d8dc425d650359c77f32c0a592f982f3',
+      '8814b8c73278da7f3cf717cacf44110a4a1bef73fb5df5aad0ff5e4c9f0d71be',
+      'a23f835b0f7348a912c1d1a25216098f791ab65235d0322b545c9cfb060880fc',
+      '7609d2415dc1eed6f2b4aa06a87c38317d6221773cdbbf6167ff60916d2a0611',
+      '732edc56f96fa24bf0d0603062412d1040e92c598f9eca056b503889eb805e08',
+      'e2a5228dd8882f3354050ce6de5b78243a0097ffe7a2d4a609f90192d621c4b3',
+      '676e74eb6ddb6d7f12d04abac3fd0701ab7c76e8d75c1aba268bfe211444589d',
+      '6896b1745d1aca24d4c510df63a433c252c3432353fed97eee6b3bf2ee835f82',
+      '387f957fa65f4ca66fe4cf119971dcc13a9ea11ebdc88846029ef5f983c577d9',
+      '87b10cbc87e946c4bebff6c56b6db4f064efdbf31cb2c253c5eddd8a6d8a3fa3',
+      '3df87f2411cb0ff0601d310471a4aa133c535685f116953029defbb3028cd1dc',
+      '08a27e7e64f3604033cfc23c7db9fb19422f09f4cba720a8422ea9e74275e1e3',
+      '9ba32b2453923a3a86f0825dafb0621fe4e5115e85a0549619c65643f546dc8a',
+      '2af1984fa705adda7b84ab132798ffd97dc29c731946df6cdb04b8a25a8b2a59',
+      'd6529b7a0ae551120a7e98d9a8da499b69e6ccd853e5d69f1f98ce015f065b70',
+      'a77a06329be0e37359e2b050155cbd5e4a5581c537ec216c717a0c620c804686',
+      'f8995abaf66dc2a22cc0f63bf27e5ed3da12c7bf069ceb46be713c1cbf662623',
+      '03a254ab78af33025b48b25a20ce74390b39368341951d319156f53005502260',
+      '775d12956d7c5cd1e1d10686aa0c9c775057852194d554b46e7d4b07a793a6bc',
+      '61352b9f88644aa33dc31b204578f77ad7e952f9452adfb3646805edd716787f',
+      '04d8057af1afb0da0e5817639b4da8674133e1db813708b8557f7ed0a1b96ac5',
+      'a620f4ef779b8f04a701ce1549c51a15ec3d9228f14eb0e44c59405068801789',
+      '5d051cb47b5e75c4736628718064f10425e60ac33314691baf56fd35ccdcc3da',
+      '92c1f726ab924bb93c6c68e31fd83dc6ca70a9be31c95aa7f1162bb99dd237c8',
+      'bb95f678df3cc4e03fa2cf51d2511ac04113a9eab62d62b2fd176088a93a7e96',
+      'efe49caa75e35ce2507e4b0954e69d74660975437ecad424b3feef94a0117fe9',
+      'f876bdcfa15af94cf8a1009d442c456a1cbe723c00604409041b89e361ee2054',
+      '6b81ea8dae5b36f12b5e6ac8f411e420ba477abfc2aa5f6e33844b340f0882bb',
+      '4354a27ee4465d75c76163a9d914ab74008c53a669a3d7ff767e9a48e9b7664a',
+      '249a17a65e3732da7dc82382d8d5bf500de3f5728108f0f1fe6e2b4c605deddd',
+      'dae8bade071aaa4dd064be9744bb6c907f2c4560b2300d7392c155a565890263',
+      'b004689fab19901b9c0de3a10af8d0b91affc05f7f27c079ee20ac6fd8efbc2d',
+      '5717b925d93d4ae4742c631a3c24d6c547c14f1e3f9a1a6242aa297b2ff2ac04',
+      '2123a560fce1866b02f7850e8905d8d4ec22d1592cbe8349ebb789d8114568d3',
+      '3c3e36b5bea4deb485a32f58c56d84939116019826ed10f6839870fb0f6084ed',
+      '70abe00c009d3215633d70952157314650c34b65fa25baa847d7b78ffb47b5fe',
+      'ca6d863fe8bddbb6edbff1ae117192fddcbf96d66121f2344bc3442bebb22e9d',
+      '71332415da96b5fae73041785267d58efcc17f498c6e3e7fb54cbd293253e10e',
+      '3224a947fc99c459aff610b261e747c1717e143208acd3bf309345df73fcdc77',
+      '8218b76478c9d3c23fda6578f0375682e6b44974b43259e837d22fac71009b09',
+      'd0c355b0e6b7f2fbf50170c3dee45c1267f642dd4adbd52fa2c6fcf4e3eb624e',
+      '4c9c53deeee08e698b575f5e61422afe79c62f381a0fb7ebe268cff3858508ba',
+      'fa47d1dc645b6b131ce221b043165fdea0ea6230f348fae047de98b135f66c0f',
+      '4002080e9476edf4a5330971707c00aa957f47cc57a410b3fe3da969de5acac6',
+      'a7e571b281736909c9bf2b4c04302fd6dbee16e619a6714b76a9c9cac5f2ec0a',
+      '996be847607224b1488b8dfc1670322b95e02501e032130f101e2f06ed1ffdb1',
+      'dc6ebe47c89b825dce17e83b387a76d2e6ba68c8b31d30cd2a7267f629b8ecc9',
+      'fd66970a62313479f2d8516bb543679e2e0c82aa2df2a5ef800c6aee82c7a4cd',
+      'ac82303c3a2ed78353d79480caf2133c7ae5e0e85c8e9b7090cfeb102c9c7597',
+      '37b570402f45e6b7384c162638de007646f7aa3374f399d6acb56e9c05bf9fa4',
+      '6b6fc0c32286a2394584ecf67f3d18c32b25c1fe15188f7d4f69c3f7f0535951',
+      '75996036bc072a2471a240b9d988cf2b9c2b52289b47ebba41cf0e4fa4baa27a',
+      '2e09aab4eab24b7f6672f2cbf53a1f460a8991f3dc336788de03f3ebca7b8bc4',
+      'f84b123ce192b5ac310fe795884faab17261517fdd62a192de3ed06e61a73849',
+      '820f051039e9df919ede44a7ced091bd05965f490bef811ff3ded86d5c9b48ec',
+      '910cc40753ec9f25613816a7aa480193472780e9bd7af6d1e586e2f79eb7f3b7',
+      'a02d45c28f911ede2359b4768f431cfaf978d649d0c97279b4719962cf417d45',
+      'c4d89598c4cc9557bb3b092fc23731bc26f5296a37fe065121bc330f3c1c48c2',
+      '7971ff920d4f38a1ede63bf420a7d2ad61f26216db8c43f1af095b934c2870f6',
+      '9bb1db013ad79e9290cb71eebc4862c5bde90f8af9f8db64783434dfdb8a89e9',
+      '73119c3986c2cbc0ec8a17efa4fc4ff05c25018818a0fa1afe011d3832cc0173',
+      '68a990fca824f87ff2abb32447eabdf11c70d42a5c0baab8d4a4c4ed0b370cf8',
+      '37f984360d95cdaa4747e9d5ae20c3f330f1a0715fc64627fa363083e6c8fa54'
+    ];
+    function certCodeHashes() { return [FOUNDER_CODE_HASH].concat(CERT_CODE_HASHES); }
+    function isCertPaid() {
+      try {
+        const saved = localStorage.getItem(CERT_UNLOCK_KEY);
+        return !!saved && certCodeHashes().includes(saved);
+      } catch (e) { return false; }
+    }
+
+    let payMount = $('#cert-payment-mount');
+    if (!payMount && gateMount) {
+      payMount = document.createElement('div');
+      payMount.id = 'cert-payment-mount';
+      gateMount.insertAdjacentElement('afterend', payMount);
+    }
+
+    function renderPayment() {
+      if (!payMount) return;
+      if (isCertPaid()) {
+        payMount.innerHTML = `
+          <div class="cert-gate-banner cert-gate-ok">
+            <i class="fa-solid fa-circle-check"></i>
+            <div><strong>Certificate fee confirmed</strong> Your certificate code was accepted.</div>
+          </div>`;
+        return;
+      }
+      payMount.innerHTML = `
+        <div class="cert-gate-banner">
+          <i class="fa-solid fa-receipt"></i>
+          <div>
+            <strong>Certificate fee: $1.50 (one time)</strong>
+            The training is free. A small fee applies only when you receive your ADA certificate.
+            <ol>
+              <li>Pay $1.50 with PayPal: <a href="${CERT_PAYPAL_URL}" target="_blank" rel="noopener" class="btn btn-primary" style="padding:6px 14px;margin-left:6px;">Pay $1.50</a></li>
+              <li>ADA will email you a certificate code after your payment.</li>
+              <li>Enter your code below.</li>
+            </ol>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+              <input type="text" id="cert-code-input" placeholder="ADA-XXXX-XXXX" autocomplete="off" style="flex:1;min-width:180px;padding:10px;border:1px solid #bbb;border-radius:6px;">
+              <button type="button" class="btn btn-primary" id="cert-code-btn">Unlock certificate</button>
+            </div>
+            <div id="cert-code-status" style="margin-top:6px;font-size:14px;"></div>
+            <div style="margin-top:6px;font-size:13px;">Questions about your payment? Write to info@accuratedataannotator.com</div>
+          </div>
+        </div>`;
+      const input = $('#cert-code-input');
+      const btn = $('#cert-code-btn');
+      const status = $('#cert-code-status');
+      function tryCode() {
+        const entered = input.value.trim().toUpperCase();
+        if (!entered) { status.textContent = 'Please enter your certificate code.'; return; }
+        const h = sha256Hex(entered);
+        if (certCodeHashes().includes(h)) {
+          try { localStorage.setItem(CERT_UNLOCK_KEY, h); } catch (e) {}
+          renderPayment();
+          renderGate();
+        } else {
+          input.classList.add('input-error');
+          setTimeout(() => input.classList.remove('input-error'), 400);
+          status.textContent = "That code isn't recognized. Check the email from ADA after your payment, or contact us.";
+        }
+      }
+      btn.addEventListener('click', tryCode);
+      input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); tryCode(); } });
+    }
+
     function checkEligibility() {
       const journey = getJourney();
       const missing = requiredSteps.filter(s => !isStepDone(s.key));
       const englishScore = journey.english && journey.english.score;
       const englishMissing = typeof englishScore !== 'number';
       const belowPassMark = !englishMissing && englishScore < 60;
+      const unpaid = !isCertPaid();
       return {
-        eligible: !missing.length && !belowPassMark && !englishMissing,
-        missing, belowPassMark, englishMissing, englishScore,
+        eligible: !missing.length && !belowPassMark && !englishMissing && !unpaid,
+        missing, belowPassMark, englishMissing, englishScore, unpaid,
       };
     }
 
@@ -1386,6 +1613,7 @@
                 ${status.missing.map(s => `<li>${s.label} — not yet marked complete</li>`).join('')}
                 ${status.belowPassMark ? `<li>English Test score (${status.englishScore}%) is below the 60% minimum</li>` : ''}
                 ${status.englishMissing ? `<li>English Test — no score recorded yet</li>` : ''}
+                ${status.unpaid ? `<li>Certificate fee ($1.50) — enter your certificate code below</li>` : ''}
               </ul>
             </div>
           </div>`;
@@ -1394,13 +1622,14 @@
       if (certGenBtn) {
         certGenBtn.disabled = !status.eligible;
         certGenBtn.classList.toggle('btn-disabled', !status.eligible);
-        certGenBtn.title = status.eligible ? '' : 'Complete all steps (and score 60%+ on the English Test) to unlock';
+        certGenBtn.title = status.eligible ? '' : 'Complete all steps, score 60%+ on the English Test, and enter your certificate code to unlock';
       }
 
       return status.eligible;
     }
 
     renderGate();
+    renderPayment();
 
     const canvas   = $('#cert-canvas');
     const ctx      = canvas.getContext('2d');
